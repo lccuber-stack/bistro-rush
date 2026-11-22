@@ -124,33 +124,54 @@
         </div>
       </div>
 
-      <!-- Center: Cash, Combo & Stars -->
-      <div class="flex items-center gap-1.5 sm:gap-2.5">
-        <div class="flex items-center gap-1 bg-emerald-950/80 border border-emerald-500/35 rounded-xl px-2.5 py-1.5">
-          <span class="text-emerald-400 font-bold text-sm">$</span>
-          <span id="hud-money" class="font-mono-num text-sm sm:text-base font-extrabold text-emerald-300">65</span>
+      <!-- Center: Cash, Combo & Rating -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <div class="bg-emerald-950/90 border border-emerald-500/40 rounded-xl px-2.5 sm:px-3 py-1 flex items-center gap-1 shadow-inner">
+          <span class="text-emerald-400 font-extrabold text-xs sm:text-sm">$</span>
+          <span id="hud-money" class="font-mono-num font-extrabold text-xs sm:text-sm text-emerald-300">65</span>
         </div>
 
-        <div class="hidden md:flex items-center gap-1 bg-amber-500/15 border border-amber-400/35 rounded-xl px-2.5 py-1.5">
-          <span class="text-xs font-bold text-amber-300">Combo</span>
-          <span id="hud-combo" class="font-mono-num text-xs font-extrabold text-amber-400">x1.0</span>
+        <div class="hidden md:flex bg-amber-950/80 border border-amber-500/35 rounded-xl px-2.5 py-1 items-center gap-1">
+          <span class="text-[11px] text-amber-300 font-bold">Combo</span>
+          <span id="hud-combo" class="font-mono-num font-extrabold text-xs text-amber-400">x1.0</span>
         </div>
 
-        <div class="flex items-center gap-1 bg-slate-900/90 border border-slate-800 rounded-xl px-2 py-1.5">
+        <div class="hidden sm:flex bg-slate-900/90 border border-slate-800 rounded-xl px-2.5 py-1 items-center gap-1">
           <span class="text-amber-400 text-xs">★</span>
-          <span id="hud-rep" class="font-mono-num text-xs sm:text-sm font-bold text-slate-100">4.5</span>
+          <span id="hud-rep" class="font-mono-num font-bold text-xs text-slate-200">4.5</span>
         </div>
       </div>
 
-      <!-- Right: Market & Audio Mute -->
+      <!-- Right: Market, Pause & 2D SVG Audio Mute -->
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <button id="btn-market-open" class="btn-tactile relative flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs sm:text-sm rounded-xl px-3 py-1.5 shadow-lg shadow-orange-500/20">
-          <span>🛒 Market</span>
+        <button id="btn-market-open" class="btn-tactile relative flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-extrabold text-xs sm:text-sm rounded-xl px-2.5 sm:px-3 py-1.5 shadow-lg shadow-orange-500/20">
+          <svg class="w-4 h-4 text-slate-950 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="20" r="1.5" fill="currentColor"></circle>
+            <circle cx="18" cy="20" r="1.5" fill="currentColor"></circle>
+            <path d="M2.5 4h2.8l2.2 10.5a1.5 1.5 0 0 0 1.5 1.2h8.8a1.5 1.5 0 0 0 1.4-1.1L21 7H6.2"></path>
+          </svg>
+          <span>Market</span>
           <span id="market-low-badge" class="hidden absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center border border-slate-950">!</span>
         </button>
 
-        <button id="btn-mute" aria-label="Toggle Sound" class="btn-tactile w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-200 text-sm">
-          <span id="icon-sound-state">🔊</span>
+        <button id="btn-pause" aria-label="Pause Game" title="Pause" class="btn-tactile w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-100">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="5" width="4" height="14" rx="1.5"></rect>
+            <rect x="14" y="5" width="4" height="14" rx="1.5"></rect>
+          </svg>
+        </button>
+
+        <button id="btn-mute" aria-label="Toggle Sound" title="Sound" class="btn-tactile w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-100">
+          <svg id="icon-sound-on" class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg id="icon-sound-off" class="hidden w-4 h-4 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
         </button>
       </div>
     </div>
@@ -251,6 +272,10 @@
         </div>
       </div>
 
+      <div id="summary-review-box" class="bg-amber-500/10 border border-amber-400/25 rounded-2xl px-3.5 py-2.5 text-xs text-amber-200 italic">
+        "Cozy atmosphere and sizzling fresh plates!" — Local Regular
+      </div>
+
       <div class="grid grid-cols-2 gap-2.5 pt-1">
         <button id="btn-summary-market" class="btn-tactile bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-sm rounded-xl py-3">
           Open Market
@@ -322,7 +347,7 @@
 
       <div class="px-5 py-3 bg-slate-900/95 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
         <div class="flex items-center gap-2">
-          <span id="app-version-label" class="font-mono-num font-semibold text-slate-500">v2.0.0</span>
+          <span id="app-version-label" class="font-mono-num font-semibold text-slate-500">v1.1.1</span>
           <span id="update-status-text" class="text-slate-400">Up to date</span>
         </div>
         <button id="btn-check-update" class="btn-tactile flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold">
@@ -346,14 +371,41 @@
     </div>
   </div>
 
+  <!-- MODAL 5: PAUSE OVERLAY -->
+  <div id="modal-pause" class="fixed inset-0 z-40 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 safe-pt safe-pb">
+    <div class="glass-card w-full max-w-xs rounded-3xl p-6 text-center space-y-4 animate-modal">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-amber-400">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="6" y="5" width="4" height="14" rx="1.5"></rect>
+          <rect x="14" y="5" width="4" height="14" rx="1.5"></rect>
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-xl font-extrabold text-white">Kitchen Paused</h3>
+        <p class="text-xs text-slate-400 mt-1">Take a breather — orders & timers are frozen</p>
+      </div>
+      <div class="space-y-2 pt-1">
+        <button id="btn-resume-game" class="btn-tactile w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm rounded-xl py-3 shadow-lg">
+          Resume Shift
+        </button>
+        <button id="btn-pause-market" class="btn-tactile w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 font-bold text-xs rounded-xl py-2.5">
+          Open Market & Upgrades
+        </button>
+        <button id="btn-pause-menu" class="btn-tactile w-full bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold text-xs rounded-xl py-2.5">
+          Save Slots & Main Menu
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     /**
      * =========================================================================
-     * BISTRO RUSH v2.2 — FLICKER-FREE TOP-DOWN 2D RESTAURANT & KITCHEN TYCOON
+     * BISTRO RUSH v1.1.1 — FLICKER-FREE TOP-DOWN 2D RESTAURANT & KITCHEN TYCOON
      * =========================================================================
      */
 
-    const APP_VERSION = "2.2.0";
+    const APP_VERSION = "1.1.1";
     const STORAGE_KEY_ROOT = "bistro_rush_save_v2";
 
     // 1. HIGH-CONTRAST CHEF PWA HOME SCREEN ICON GENERATOR (NO TEXT, DARK INDIGO BACKDROP)
@@ -602,6 +654,29 @@
       { name: "Artisan Baker", shirt: "#fb7185", hair: "#92400e", isVip: false, tipMult: 1.15, patienceSec: 29 }
     ];
 
+    const GUEST_REVIEWS = {
+      fast: [
+        "Lightning fast service!",
+        "10/10, piping hot!",
+        "Best bistro in town!",
+        "Chef is on fire today!",
+        "So fresh & delicious!",
+        "Michelin star worthy!"
+      ],
+      good: [
+        "Really tasty plate!",
+        "Great flavors, thank you!",
+        "Loved every bite!",
+        "Will definitely come back!",
+        "Spot on seasoning!"
+      ],
+      slow: [
+        "Worth the wait, yum!",
+        "Slow queue, great food.",
+        "Finally! Tastes amazing."
+      ]
+    };
+
     // 5. PERSISTENT SAVE STORAGE
     function createDefaultSlotData(name = "The Golden Skillet") {
       return {
@@ -623,7 +698,7 @@
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && Array.isArray(parsed.slots)) {
-            parsed.highscores = Object.assign({ bestCash: 65, bestDay: 1, totalDishesEver: 0 }, parsed.highscores || {});
+            parsed.highscores = Object.assign({ bestCash: 0, bestDay: 1, totalDishesEver: 0 }, parsed.highscores || {});
             parsed.slots = parsed.slots.map(slot => {
               if (!slot) return null;
               const def = createDefaultSlotData(slot.bistroName || "The Golden Skillet");
@@ -635,6 +710,9 @@
                 upgrades: Object.assign({}, def.upgrades, slot.upgrades || {})
               };
             });
+            if (parsed.highscores.totalDishesEver === 0 && parsed.highscores.bestCash === 65) {
+              parsed.highscores.bestCash = 0;
+            }
             return parsed;
           }
         }
@@ -643,7 +721,7 @@
         schemaVersion: 2,
         muted: false,
         activeSlotIndex: 0,
-        highscores: { bestCash: 65, bestDay: 1, totalDishesEver: 0 },
+        highscores: { bestCash: 0, bestDay: 1, totalDishesEver: 0 },
         slots: [createDefaultSlotData("The Golden Skillet"), null, null]
       };
     }
@@ -656,7 +734,9 @@
         const slot = storageRoot.slots[storageRoot.activeSlotIndex];
         if (slot) {
           slot.updatedAt = Date.now();
-          if (slot.money > storageRoot.highscores.bestCash) storageRoot.highscores.bestCash = slot.money;
+          if (slot.totalServed > 0 && slot.money > storageRoot.highscores.bestCash) {
+            storageRoot.highscores.bestCash = slot.money;
+          }
           if (slot.day > storageRoot.highscores.bestDay) storageRoot.highscores.bestDay = slot.day;
         }
         storageRoot.muted = sfx.muted;
@@ -695,9 +775,11 @@
       shiftTimeLeft: SHIFT_DURATION,
       spawnCooldown: 0.6,
       combo: 1.0,
+      specialRecipeId: "burger",
+      lastGuestReview: null,
       shiftStats: { served: 0, earned: 0, missed: 0 },
       stations: [],    // { index, status: 'empty'|'cooking'|'ready'|'burned', recipeId, progress, duration, burnProgress, hitRect }
-      customers: [],   // { uid, style, recipeId, state: 'entering'|'queuing'|'walkingToTable'|'eating'|'leaving', queueIdx, tableIdx, x, y, targetX, targetY, patience, maxPatience, eatTimer, bobPhase }
+      customers: [],   // { uid, style, recipeId, state: 'entering'|'queuing'|'walkingToTable'|'eating'|'leaving', queueIdx, tableIdx, x, y, targetX, targetY, patience, maxPatience, eatTimer, reviewText, bobPhase }
       chef: { x: 400, y: 120, targetX: 400, targetY: 120, bob: 0 },
       tableTips: [],   // { tableIdx, amount, x, y, hitRect }
       particles: [],
@@ -841,6 +923,11 @@
     function startShift() {
       computeWorldLayout();
       initStationsFromSave();
+      const save = getActiveSave();
+      const unlocked = RECIPES.filter(r => r.unlockDay <= save.day);
+      gameState.specialRecipeId = unlocked[(save.day - 1) % unlocked.length].id;
+      gameState.lastGuestReview = null;
+
       gameState.customers = [];
       gameState.tableTips = [];
       gameState.particles = [];
@@ -855,9 +942,21 @@
       document.getElementById("modal-main-menu").classList.add("hidden");
       document.getElementById("modal-shift-end").classList.add("hidden");
       document.getElementById("modal-market").classList.add("hidden");
+      document.getElementById("modal-pause").classList.add("hidden");
       document.getElementById("btn-menu-close").classList.remove("hidden");
 
       syncStaticDomUI();
+    }
+
+    function pauseGame() {
+      if (!gameState.isPlaying) return;
+      gameState.isPaused = true;
+      document.getElementById("modal-pause").classList.remove("hidden");
+    }
+
+    function resumeGame() {
+      document.getElementById("modal-pause").classList.add("hidden");
+      if (gameState.isPlaying) gameState.isPaused = false;
     }
 
     function spawnCustomer() {
@@ -890,6 +989,7 @@
         patience: maxPatience,
         maxPatience,
         eatTimer: 0,
+        reviewText: "",
         bobPhase: Math.random() * Math.PI * 2
       });
 
@@ -986,9 +1086,16 @@
 
         const patienceRatio = guest.patience / guest.maxPatience;
         const tipUpgradeMult = 1 + (save.upgrades.tipBonus * 0.15);
-        const rawTotal = recipe.price * guest.style.tipMult * tipUpgradeMult * gameState.combo;
+        const specialMult = recipe.id === gameState.specialRecipeId ? 1.5 : 1.0;
+        const rawTotal = recipe.price * guest.style.tipMult * tipUpgradeMult * gameState.combo * specialMult;
         const speedBonus = patienceRatio > 0.5 ? Math.round(recipe.price * 0.25) : 0;
         const totalEarned = Math.round(rawTotal + speedBonus);
+
+        // Pick guest service & food review comment based on wait speed
+        const reviewTier = patienceRatio > 0.62 ? "fast" : (patienceRatio > 0.28 ? "good" : "slow");
+        const pool = GUEST_REVIEWS[reviewTier];
+        guest.reviewText = pool[Math.floor(Math.random() * pool.length)];
+        gameState.lastGuestReview = { text: guest.reviewText, author: guest.style.name };
 
         save.money += totalEarned;
         save.totalServed += 1;
@@ -1356,28 +1463,33 @@
 
           ctx.fillStyle = isDishReady ? "#065f46" : "#0f172a";
           ctx.beginPath();
-          ctx.roundRect(bx - 18, by - 16, 48, 30, 9);
+          ctx.roundRect(bx - 16, by - 16, 32, 32, 10);
           ctx.fill();
-          ctx.lineWidth = isDishReady ? 2 : 1.2;
-          ctx.strokeStyle = isDishReady ? "#34d399" : "#475569";
+          ctx.lineWidth = isDishReady ? 2.2 : 1.5;
+          ctx.strokeStyle = isDishReady ? "#34d399" : "#f59e0b";
           ctx.stroke();
 
-          // Dish Emoji in Bubble
-          ctx.font = "17px sans-serif";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(recipe.icon, bx + 4, by - 2);
-          ctx.textBaseline = "alphabetic";
+          if (recipe) {
+            ctx.font = "18px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(recipe.icon, bx, by);
+            ctx.textBaseline = "alphabetic";
+          }
 
-          // Patience Mini-Bar inside bubble
-          const pRatio = Math.max(0, cust.patience / cust.maxPatience);
+          // Patience Bar under Bubble
+          const pRatio = Math.max(0, Math.min(1, cust.patience / cust.maxPatience));
           ctx.fillStyle = "#1e293b";
-          ctx.fillRect(bx - 12, by + 8, 36, 3.5);
-          ctx.fillStyle = pRatio > 0.5 ? "#34d399" : (pRatio > 0.25 ? "#fbbf24" : "#f43f5e");
-          ctx.fillRect(bx - 12, by + 8, 36 * pRatio, 3.5);
+          ctx.beginPath();
+          ctx.roundRect(bx - 14, by + 18, 28, 4, 2);
+          ctx.fill();
+          ctx.fillStyle = pRatio > 0.5 ? "#10b981" : (pRatio > 0.25 ? "#f59e0b" : "#f43f5e");
+          ctx.beginPath();
+          ctx.roundRect(bx - 14, by + 18, 28 * pRatio, 4, 2);
+          ctx.fill();
         }
 
-        // Plate on Table while Eating
+        // Plate on Table & Guest Review Speech Bubble while Eating
         if (cust.state === "eating" && cust.tableIdx >= 0) {
           const tbl = viewMetrics.tables[cust.tableIdx];
           const recipe = RECIPES.find(r => r.id === cust.recipeId);
@@ -1386,6 +1498,28 @@
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText(recipe.icon, tbl.x, tbl.y);
+            ctx.textBaseline = "alphabetic";
+          }
+
+          if (cust.reviewText) {
+            ctx.font = "700 10px 'Plus Jakarta Sans', sans-serif";
+            const textW = ctx.measureText(cust.reviewText).width;
+            const bubbleW = Math.min(168, textW + 16);
+            const bx = Math.max(bubbleW / 2 + 6, Math.min(W - bubbleW / 2 - 6, cust.x + 14));
+            const by = cust.y - 31;
+
+            ctx.fillStyle = "rgba(15, 23, 42, 0.94)";
+            ctx.beginPath();
+            ctx.roundRect(bx - bubbleW / 2, by - 11, bubbleW, 20, 8);
+            ctx.fill();
+            ctx.strokeStyle = "rgba(251, 191, 36, 0.55)";
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+
+            ctx.fillStyle = "#fef3c7";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(cust.reviewText, bx, by - 1, bubbleW - 10);
             ctx.textBaseline = "alphabetic";
           }
         }
@@ -1435,7 +1569,10 @@
     // 10. THROTTLED HUD & STATIC DOCK UPDATES (Only updates when values actually change!)
     let lastHintText = "";
     function updateContextualHint() {
-      let nextHint = "Watch the queue! Tap a glowing dish below to start cooking.";
+      const specialRec = RECIPES.find(r => r.id === gameState.specialRecipeId);
+      let nextHint = specialRec
+        ? `⭐ Today's Special: ${specialRec.icon} ${specialRec.name} (1.5x Pay!)`
+        : "Watch the queue! Tap a glowing dish below to start cooking.";
       const hasReady = gameState.stations.some(s => s.status === "ready");
       const hasBurned = gameState.stations.some(s => s.status === "burned");
       const hasTip = gameState.tableTips.length > 0;
@@ -1446,6 +1583,8 @@
         nextHint = "🛎️ Order ready! Tap the glowing plate on the stove to serve!";
       } else if (hasTip) {
         nextHint = "💰 Tap the gold coins on the dining tables to collect tips!";
+      } else if (gameState.shiftTimeLeft > 0 && gameState.shiftTimeLeft <= 20) {
+        nextHint = "🔥 RUSH HOUR! Fast orders earn huge combo tips!";
       } else if (gameState.customers.some(c => c.state === "queuing" || c.state === "entering")) {
         const firstGuest = gameState.customers.find(c => c.state === "queuing" || c.state === "entering");
         const rec = RECIPES.find(r => r.id === firstGuest.recipeId);
@@ -1529,10 +1668,11 @@
         }).join(" ");
 
         return `
-          <button data-recipe="${recipe.id}" class="recipe-cook-btn btn-tactile rounded-xl border bg-gradient-to-br ${recipe.accent} p-2 sm:p-2.5 text-left flex flex-col justify-between ${!canCook ? 'opacity-50' : 'hover:brightness-110'}">
+          <button data-recipe="${recipe.id}" class="recipe-cook-btn btn-tactile relative rounded-xl border bg-gradient-to-br ${recipe.accent} p-2 sm:p-2.5 text-left flex flex-col justify-between ${!canCook ? 'opacity-50' : 'hover:brightness-110'}">
+            ${recipe.id === gameState.specialRecipeId ? `<span class="absolute -top-2 left-2 px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[9px] shadow">★ 1.5X</span>` : ''}
             <div class="flex items-center justify-between w-full">
               <span class="text-xl sm:text-2xl">${recipe.icon}</span>
-              <span class="font-mono-num text-xs font-extrabold text-emerald-300 bg-slate-950/70 px-1.5 py-0.5 rounded-md">$${recipe.price}</span>
+              <span class="font-mono-num text-xs font-extrabold text-emerald-300 bg-slate-950/70 px-1.5 py-0.5 rounded-md">$${recipe.id === gameState.specialRecipeId ? Math.round(recipe.price * 1.5) : recipe.price}</span>
             </div>
             <div class="mt-1">
               <div class="text-xs font-extrabold text-white truncate">${recipe.name}</div>
@@ -1555,6 +1695,7 @@
     function openMarketModal() {
       gameState.isPaused = true;
       document.getElementById("modal-shift-end").classList.add("hidden");
+      document.getElementById("modal-pause").classList.add("hidden");
       document.getElementById("modal-market").classList.remove("hidden");
       renderMarketContent();
     }
@@ -1666,6 +1807,7 @@
 
     function openMainMenu() {
       gameState.isPaused = true;
+      document.getElementById("modal-pause").classList.add("hidden");
       document.getElementById("app-version-label").textContent = `v${APP_VERSION}`;
       document.getElementById("highscore-cash").textContent = `$${storageRoot.highscores.bestCash}`;
       document.getElementById("highscore-day").textContent = storageRoot.highscores.bestDay;
@@ -1729,18 +1871,20 @@
     let timerTextCache = "";
 
     function mainLoop(now) {
-      const dt = Math.min(0.1, (now - lastTime) / 1000);
+      const dt = Math.min(0.05, Math.max(0, (now - lastTime) / 1000));
       lastTime = now;
 
       if (gameState.isPlaying && !gameState.isPaused) {
-        gameState.shiftTimeLeft -= dt;
+        gameState.shiftTimeLeft = Math.max(0, gameState.shiftTimeLeft - dt);
 
-        // Spawn customers
+        // Spawn customers (faster during final 20s Rush Hour)
         gameState.spawnCooldown -= dt;
         if (gameState.spawnCooldown <= 0) {
           spawnCustomer();
           const save = getActiveSave();
-          gameState.spawnCooldown = Math.max(3.5, 7.0 - save.day * 0.35);
+          const isRush = gameState.shiftTimeLeft <= 20;
+          const baseCooldown = Math.max(3.4, 6.8 - save.day * 0.35);
+          gameState.spawnCooldown = isRush ? baseCooldown * 0.68 : baseCooldown;
         }
 
         // Smoothly move Chef
@@ -1782,6 +1926,10 @@
               sfx.playError();
               showToast(`${c.style.name} left hungry!`, "rose");
               queueChanged = true;
+            }
+          } else if (c.state === "eating") {
+            c.eatTimer -= dt;
+            if (c.eatTimer <= 0) {
               // Drop gold coin tip on table & leave happily (merges with existing tip on same table)
               const tbl = viewMetrics.tables[c.tableIdx];
               if (tbl) {
@@ -1799,6 +1947,7 @@
                 }
               }
               c.tableIdx = -1;
+              c.reviewText = "";
               c.state = "leaving";
               c.targetX = viewMetrics.doorPos.x;
               c.targetY = viewMetrics.doorPos.y;
@@ -1856,6 +2005,7 @@
           document.getElementById("modal-market").classList.add("hidden");
           document.getElementById("modal-main-menu").classList.add("hidden");
           document.getElementById("modal-new-game").classList.add("hidden");
+          document.getElementById("modal-pause").classList.add("hidden");
 
           document.getElementById("summary-day").textContent = completedDay;
           document.getElementById("summary-served").textContent = gameState.shiftStats.served;
@@ -1863,6 +2013,14 @@
           document.getElementById("summary-missed").textContent = gameState.shiftStats.missed;
           document.getElementById("summary-balance").textContent = `$${save.money}`;
           document.getElementById("summary-next-day").textContent = save.day;
+
+          const reviewBox = document.getElementById("summary-review-box");
+          if (gameState.lastGuestReview) {
+            reviewBox.textContent = `"${gameState.lastGuestReview.text}" — ${gameState.lastGuestReview.author}`;
+          } else {
+            reviewBox.textContent = `"Cozy atmosphere and sizzling fresh plates!" — Local Regular`;
+          }
+
           document.getElementById("modal-shift-end").classList.remove("hidden");
           sfx.playCashRegister();
         }
@@ -1889,10 +2047,30 @@
     }
 
     // 13. UI BUTTON WIRING & STARTUP
+    function syncSoundIcon() {
+      document.getElementById("icon-sound-on").classList.toggle("hidden", sfx.muted);
+      document.getElementById("icon-sound-off").classList.toggle("hidden", !sfx.muted);
+    }
+
     document.getElementById("btn-mute").addEventListener("click", () => {
       sfx.muted = !sfx.muted;
-      document.getElementById("icon-sound-state").textContent = sfx.muted ? "🔇" : "🔊";
+      syncSoundIcon();
       persistStorage();
+    });
+
+    document.getElementById("btn-pause").addEventListener("click", pauseGame);
+    document.getElementById("btn-resume-game").addEventListener("click", resumeGame);
+    document.getElementById("btn-pause-market").addEventListener("click", openMarketModal);
+    document.getElementById("btn-pause-menu").addEventListener("click", openMainMenu);
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" || e.key === "p" || e.key === "P") {
+        if (!document.getElementById("modal-pause").classList.contains("hidden")) {
+          resumeGame();
+        } else if (gameState.isPlaying && !gameState.isPaused) {
+          pauseGame();
+        }
+      }
     });
 
     document.getElementById("btn-market-open").addEventListener("click", openMarketModal);
@@ -1956,7 +2134,7 @@
     document.addEventListener("dblclick", e => e.preventDefault(), { passive: false });
 
     window.addEventListener("load", () => {
-      document.getElementById("icon-sound-state").textContent = sfx.muted ? "🔇" : "🔊";
+      syncSoundIcon();
       computeWorldLayout();
       initStationsFromSave();
       syncStaticDomUI();
