@@ -158,17 +158,16 @@
   <main id="canvas-wrapper" class="relative flex-1 w-full min-h-0 overflow-hidden bg-[#131a29]">
     <canvas id="restaurant-canvas" class="block w-full h-full cursor-pointer"></canvas>
 
-    <!-- Floating Contextual Guide Pill (Non-intrusive, updates smoothly only on text change) -->
-    <div class="absolute top-2.5 left-1/2 -translate-x-1/2 pointer-events-none z-10 w-[92%] max-w-md flex justify-center">
-      <div id="live-hint-pill" class="px-3.5 py-1 rounded-full bg-slate-950/80 border border-slate-700/70 backdrop-blur-md text-[11px] sm:text-xs font-bold text-amber-300 shadow-lg text-center truncate">
+    <!-- Top Overlay Row: Hint Pill + Add Burner (Flex layout prevents any overlap on narrow iPhones) -->
+    <div class="absolute top-2 left-2.5 right-2.5 z-10 flex items-center justify-between gap-2 pointer-events-none">
+      <div id="live-hint-pill" class="px-3 py-1 rounded-full bg-slate-950/85 border border-slate-700/75 backdrop-blur-md text-[11px] sm:text-xs font-bold text-amber-300 shadow-lg truncate min-w-0 flex-1">
         Guests are arriving! Tap a glowing dish below to cook.
       </div>
-    </div>
 
-    <!-- Floating Quick Action: Add Burner -->
-    <button id="btn-upgrade-stove" class="btn-tactile absolute top-2.5 right-2.5 z-10 text-[11px] font-extrabold bg-indigo-950/90 hover:bg-indigo-900 text-indigo-200 border border-indigo-400/40 rounded-xl px-2.5 py-1.5 shadow-lg backdrop-blur-md">
-      + Burner ($120)
-    </button>
+      <button id="btn-upgrade-stove" class="btn-tactile pointer-events-auto shrink-0 text-[11px] font-extrabold bg-indigo-950/95 hover:bg-indigo-900 text-indigo-200 border border-indigo-400/45 rounded-full px-3 py-1 shadow-lg backdrop-blur-md">
+        + Burner ($120)
+      </button>
+    </div>
   </main>
 
   <!-- BOTTOM DOCK: PANTRY STOCK & DISH COOKING BUTTONS -->
@@ -348,14 +347,14 @@
   <script>
     /**
      * =========================================================================
-     * BISTRO RUSH v2.0 — FLICKER-FREE TOP-DOWN 2D RESTAURANT & KITCHEN TYCOON
+     * BISTRO RUSH v2.1 — FLICKER-FREE TOP-DOWN 2D RESTAURANT & KITCHEN TYCOON
      * =========================================================================
      */
 
-    const APP_VERSION = "2.0.1";
+    const APP_VERSION = "2.1.0";
     const STORAGE_KEY_ROOT = "bistro_rush_save_v2";
 
-    // 1. PWA HOME SCREEN ICON GENERATOR
+    // 1. SLEEK TEXT-FREE PWA HOME SCREEN ICON GENERATOR
     (function generatePWAHomeIcon() {
       try {
         const canvas = document.createElement("canvas");
@@ -363,40 +362,85 @@
         canvas.height = 512;
         const ctx = canvas.getContext("2d");
 
-        const bgGrad = ctx.createLinearGradient(0, 0, 512, 512);
+        // Deep Obsidian-Slate Radial Background
+        const bgGrad = ctx.createRadialGradient(256, 190, 30, 256, 256, 380);
         bgGrad.addColorStop(0, "#1e293b");
-        bgGrad.addColorStop(1, "#0f172a");
+        bgGrad.addColorStop(0.65, "#0f172a");
+        bgGrad.addColorStop(1, "#070b14");
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, 512, 512);
 
+        // Subtle Warm Golden Halo Glow
+        const glowGrad = ctx.createRadialGradient(256, 265, 20, 256, 265, 210);
+        glowGrad.addColorStop(0, "rgba(245, 158, 11, 0.28)");
+        glowGrad.addColorStop(1, "rgba(245, 158, 11, 0)");
+        ctx.fillStyle = glowGrad;
         ctx.beginPath();
-        ctx.arc(256, 240, 175, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(245, 158, 11, 0.14)";
+        ctx.arc(256, 265, 210, 0, Math.PI * 2);
         ctx.fill();
-        ctx.lineWidth = 14;
-        ctx.strokeStyle = "#f59e0b";
+
+        // Outer Metallic Gold Emblem Ring
+        const ringGrad = ctx.createLinearGradient(96, 96, 416, 416);
+        ringGrad.addColorStop(0, "#fde68a");
+        ringGrad.addColorStop(0.5, "#f59e0b");
+        ringGrad.addColorStop(1, "#b45309");
+        ctx.beginPath();
+        ctx.arc(256, 256, 186, 0, Math.PI * 2);
+        ctx.lineWidth = 12;
+        ctx.strokeStyle = ringGrad;
         ctx.stroke();
 
+        // Minimalist Chef Toque Silhouette (Top Crown)
+        ctx.fillStyle = "#f8fafc";
         ctx.beginPath();
-        ctx.arc(256, 265, 115, Math.PI, 0, false);
+        ctx.arc(256, 178, 46, Math.PI * 0.9, Math.PI * 2.1);
+        ctx.arc(212, 196, 32, Math.PI * 0.65, Math.PI * 1.85);
+        ctx.arc(300, 196, 32, Math.PI * 1.15, Math.PI * 2.35);
         ctx.closePath();
-        ctx.fillStyle = "#f8fafc";
         ctx.fill();
 
+        // Chef Hat Band
+        ctx.fillStyle = "#e2e8f0";
         ctx.beginPath();
-        ctx.arc(256, 140, 16, 0, Math.PI * 2);
-        ctx.fillStyle = "#f59e0b";
+        ctx.roundRect(210, 212, 92, 16, 6);
         ctx.fill();
 
+        // Gourmet Cloche Dome (Centerpiece)
+        const domeGrad = ctx.createLinearGradient(140, 240, 372, 350);
+        domeGrad.addColorStop(0, "#ffffff");
+        domeGrad.addColorStop(0.65, "#e2e8f0");
+        domeGrad.addColorStop(1, "#94a3b8");
+        ctx.fillStyle = domeGrad;
         ctx.beginPath();
-        ctx.roundRect(118, 276, 276, 22, 11);
-        ctx.fillStyle = "#f59e0b";
+        ctx.arc(256, 336, 114, Math.PI, 0, false);
+        ctx.closePath();
         ctx.fill();
 
-        ctx.fillStyle = "#f8fafc";
-        ctx.font = "800 50px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("BISTRO RUSH", 256, 385);
+        // Specular Highlight Curve on Cloche
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+        ctx.lineWidth = 7;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.arc(256, 336, 92, Math.PI * 1.15, Math.PI * 1.48);
+        ctx.stroke();
+
+        // Golden Cloche Handle Finial
+        ctx.fillStyle = ringGrad;
+        ctx.beginPath();
+        ctx.arc(256, 214, 15, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Golden Serving Platter Base
+        ctx.fillStyle = ringGrad;
+        ctx.beginPath();
+        ctx.roundRect(116, 346, 280, 22, 11);
+        ctx.fill();
+
+        // Subtle Platter Under-Shadow
+        ctx.fillStyle = "rgba(0, 0, 0, 0.38)";
+        ctx.beginPath();
+        ctx.ellipse(256, 378, 118, 9, 0, 0, Math.PI * 2);
+        ctx.fill();
 
         const dataUrl = canvas.toDataURL("image/png");
         let appleIcon = document.querySelector("link[rel='apple-touch-icon']");
@@ -636,7 +680,21 @@
         const raw = localStorage.getItem(STORAGE_KEY_ROOT);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && Array.isArray(parsed.slots)) return parsed;
+          if (parsed && Array.isArray(parsed.slots)) {
+            parsed.highscores = Object.assign({ bestCash: 65, bestDay: 1, totalDishesEver: 0 }, parsed.highscores || {});
+            parsed.slots = parsed.slots.map(slot => {
+              if (!slot) return null;
+              const def = createDefaultSlotData(slot.bistroName || "The Golden Skillet");
+              return {
+                ...def,
+                ...slot,
+                burners: Math.min(4, Math.max(2, Number(slot.burners) || 2)),
+                inventory: Object.assign({}, def.inventory, slot.inventory || {}),
+                upgrades: Object.assign({}, def.upgrades, slot.upgrades || {})
+              };
+            });
+            return parsed;
+          }
         }
       } catch (e) {}
       return {
@@ -716,18 +774,19 @@
       viewMetrics.width = W;
       viewMetrics.height = H;
 
-      // Top 42% is the Kitchen, Middle is the Service Counter, Bottom 58% is the Dining Hall
-      const kitchenH = Math.max(145, Math.min(230, H * 0.42));
+      // Top 43% is the Kitchen (leaves comfortable room below top hint bar), Bottom 57% is Dining Hall
+      const kitchenH = Math.max(152, Math.min(235, H * 0.43));
       viewMetrics.kitchenBottomY = kitchenH;
       viewMetrics.counterY = kitchenH;
 
       // Entrance Door on Bottom-Left
-      viewMetrics.doorPos = { x: Math.max(46, W * 0.12), y: H - 14 };
+      viewMetrics.doorPos = { x: Math.max(46, W * 0.13), y: H - 14 };
 
       // Queue Spots leading up to the Left-Center Order Counter
-      const queueX = Math.max(64, W * 0.22);
-      const firstQueueY = kitchenH + 54;
-      const queueSpacing = Math.min(54, Math.max(40, (H - firstQueueY - 46) / 3.2));
+      const queueX = Math.max(54, W * 0.21);
+      const firstQueueY = kitchenH + 46;
+      const availableQueueH = Math.max(110, H - firstQueueY - 40);
+      const queueSpacing = Math.min(52, availableQueueH / 3.2);
       viewMetrics.queueSpots = [
         { x: queueX, y: firstQueueY },
         { x: queueX, y: firstQueueY + queueSpacing },
@@ -736,13 +795,13 @@
       ];
 
       // Dining Tables on the Right Side of Dining Hall
-      const diningStartX = Math.max(queueX + 95, W * 0.46);
-      const diningW = W - diningStartX - 24;
-      const diningTopY = kitchenH + 58;
-      const diningH = H - diningTopY - 26;
+      const diningStartX = Math.max(queueX + 92, W * 0.45);
+      const diningW = Math.max(140, W - diningStartX - 18);
+      const diningTopY = kitchenH + 52;
+      const diningH = Math.max(110, H - diningTopY - 22);
 
-      const cols = diningW >= 290 ? 2 : 2;
-      const rows = diningH >= 190 ? 2 : 2;
+      const cols = 2;
+      const rows = 2;
       const tables = [];
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
@@ -758,10 +817,24 @@
       }
       viewMetrics.tables = tables;
 
-      // Update Chef idle position
+      // Keep active queue & seated customer targets aligned on resize/rotation
+      reassignQueuePositions();
+      gameState.customers.forEach(c => {
+        if ((c.state === "walkingToTable" || c.state === "eating") && c.tableIdx >= 0 && tables[c.tableIdx]) {
+          c.targetX = tables[c.tableIdx].x - 24;
+          c.targetY = tables[c.tableIdx].y;
+          if (c.state === "eating") {
+            c.x = c.targetX;
+            c.y = c.targetY;
+          }
+        }
+      });
+
       if (!gameState.isPlaying) {
         gameState.chef.x = W * 0.5;
-        gameState.chef.y = kitchenH * 0.48;
+        gameState.chef.y = kitchenH * 0.54;
+        gameState.chef.targetX = gameState.chef.x;
+        gameState.chef.targetY = gameState.chef.y;
       }
     }
 
@@ -990,24 +1063,26 @@
         station.progress = 0;
         station.burnProgress = 0;
         gameState.chef.targetX = cx;
-        gameState.chef.targetY = viewMetrics.counterY - 26;
+        gameState.chef.targetY = viewMetrics.counterY - 24;
 
-        // Seat guest at a free table to enjoy meal & leave extra coin tip
-        const freeTable = viewMetrics.tables.find(t => !gameState.customers.some(c => c.tableIdx === t.index && (c.state === "walkingToTable" || c.state === "eating")));
+        // Seat guest at a free table (checks both table index and active tip coins)
+        const freeTable = viewMetrics.tables.find(t =>
+          !gameState.customers.some(c => c.tableIdx === t.index && (c.state === "walkingToTable" || c.state === "eating"))
+        );
         if (freeTable) {
           guest.state = "walkingToTable";
           guest.tableIdx = freeTable.index;
           guest.targetX = freeTable.x - 24;
           guest.targetY = freeTable.y;
-          guest.eatTimer = 4.5;
+          guest.eatTimer = 4.2;
         } else {
-          // If all tables full, guest walks out happy with takeaway
           guest.state = "leaving";
           guest.targetX = viewMetrics.doorPos.x;
           guest.targetY = viewMetrics.doorPos.y;
         }
 
         reassignQueuePositions();
+        syncRecipeHighlights();
 
         sfx.playServeSuccess(gameState.combo);
         spawnBurst(cx, cy, "#34d399", 16);
@@ -1170,17 +1245,17 @@
         ctx.textAlign = "center";
         ctx.fillText("ORDER", qSpot0.x, kY + 1);
       }
-
-      // --- D. STOVE BURNERS (Top Kitchen Counter) ---
+      // --- D. STOVE BURNERS (Top Kitchen Counter, safely below top HUD pill) ---
       const numStations = gameState.stations.length;
-      const maxStoveAreaW = Math.min(W - 32, numStations * 135);
-      const stationW = Math.min(118, (maxStoveAreaW - (numStations - 1) * 12) / numStations);
-      const stationH = Math.min(88, kY - 58);
-      const startStoveX = (W - (numStations * stationW + (numStations - 1) * 12)) / 2;
-      const stoveY = 38;
+      const gap = numStations >= 4 ? 8 : 12;
+      const maxStoveAreaW = Math.min(W - 24, numStations * 132);
+      const stationW = Math.min(116, (maxStoveAreaW - (numStations - 1) * gap) / numStations);
+      const stoveY = 44;
+      const stationH = Math.max(66, Math.min(86, kY - stoveY - 18));
+      const startStoveX = (W - (numStations * stationW + (numStations - 1) * gap)) / 2;
 
       gameState.stations.forEach((st, idx) => {
-        const sx = startStoveX + idx * (stationW + 12);
+        const sx = startStoveX + idx * (stationW + gap);
         const sy = stoveY;
         st.hitRect = { x: sx, y: sy, w: stationW, h: stationH };
 
@@ -1765,21 +1840,21 @@
               sfx.playError();
               showToast(`${c.style.name} left hungry!`, "rose");
               queueChanged = true;
-              syncStaticDomUI();
-            }
-          } else if (c.state === "eating") {
-            c.eatTimer -= dt;
-            if (c.eatTimer <= 0) {
-              // Drop gold coin tip on table & leave happily
+              // Drop gold coin tip on table & leave happily (merges with existing tip on same table)
               const tbl = viewMetrics.tables[c.tableIdx];
               if (tbl) {
                 const tipAmt = Math.max(3, Math.round(4 * c.style.tipMult));
-                gameState.tableTips.push({
-                  tableIdx: tbl.index,
-                  amount: tipAmt,
-                  x: tbl.x + 12,
-                  y: tbl.y - 10
-                });
+                const existingTip = gameState.tableTips.find(t => t.tableIdx === tbl.index);
+                if (existingTip) {
+                  existingTip.amount += tipAmt;
+                } else {
+                  gameState.tableTips.push({
+                    tableIdx: tbl.index,
+                    amount: tipAmt,
+                    x: tbl.x + 12,
+                    y: tbl.y - 10
+                  });
+                }
               }
               c.tableIdx = -1;
               c.state = "leaving";
@@ -1830,10 +1905,15 @@
         // Check End of Shift
         if (gameState.shiftTimeLeft <= 0) {
           gameState.isPlaying = false;
+          gameState.isPaused = false;
           const save = getActiveSave();
           const completedDay = save.day;
           save.day += 1;
           persistStorage();
+
+          document.getElementById("modal-market").classList.add("hidden");
+          document.getElementById("modal-main-menu").classList.add("hidden");
+          document.getElementById("modal-new-game").classList.add("hidden");
 
           document.getElementById("summary-day").textContent = completedDay;
           document.getElementById("summary-served").textContent = gameState.shiftStats.served;
