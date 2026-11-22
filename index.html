@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Bistro Rush" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Bistro Rush — Top-Down Culinary Tycoon</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      touch-action: none;
+      background-color: #0b1120;
+      color: #f8fafc;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .safe-pt { padding-top: max(8px, var(--sat)); }
+    .safe-pb { padding-bottom: max(8px, var(--sab)); }
+    .safe-pl { padding-left: max(10px, var(--sal)); }
+    .safe-pr { padding-right: max(10px, var(--sar)); }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-card {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+    }
+
+    .btn-tactile {
+      transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.15s ease;
+    }
+    .btn-tactile:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+    .btn-tactile:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    @keyframes modalAppear {
+      from { opacity: 0; transform: scale(0.95) translateY(6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .animate-modal {
+      animation: modalAppear 0.22s ease-out forwards;
+    }
+
+    .scroll-y-safe {
+      overflow-y: auto;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
+    }
+    .scroll-y-safe::-webkit-scrollbar { width: 4px; }
+    .scroll-y-safe::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="flex flex-col justify-between bg-slate-950 select-none">
+
+  <!-- TOP HUD BAR -->
+  <header class="w-full glass-panel border-b border-slate-800 safe-pt safe-pl safe-pr pb-2 px-3 z-30 shrink-0">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
+      <!-- Left: Bistro Menu & Day Timer -->
+      <div class="flex items-center gap-2 min-w-0">
+        <button id="btn-menu-open" class="btn-tactile flex items-center gap-2 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-xl px-2.5 py-1.5 text-left">
+          <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-slate-950 font-extrabold text-xs shadow-inner shrink-0">BR</span>
+          <div class="hidden sm:block leading-tight">
+            <div id="hud-bistro-name" class="text-xs font-bold text-slate-100 truncate max-w-[120px]">Bistro Rush</div>
+            <div class="text-[10px] text-amber-400 font-semibold">Menu & Saves</div>
+          </div>
+        </button>
+
+        <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 rounded-xl px-2.5 py-1.5">
+          <div>
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Day <span id="hud-day" class="text-white font-mono-num">1</span></div>
+            <div class="w-14 sm:w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden mt-0.5">
+              <div id="hud-day-progress" class="h-full bg-gradient-to-r from-emerald-400 to-amber-400" style="width: 100%"></div>
+            </div>
+          </div>
+          <span id="hud-time-left" class="font-mono-num text-xs font-bold text-slate-200">01:20</span>
+        </div>
+      </div>
+
+      <!-- Center: Cash, Combo & Stars -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5">
+        <div class="flex items-center gap-1 bg-emerald-950/80 border border-emerald-500/35 rounded-xl px-2.5 py-1.5">
+          <span class="text-emerald-400 font-bold text-sm">$</span>
+          <span id="hud-money" class="font-mono-num text-sm sm:text-base font-extrabold text-emerald-300">65</span>
+        </div>
+
+        <div class="hidden md:flex items-center gap-1 bg-amber-500/15 border border-amber-400/35 rounded-xl px-2.5 py-1.5">
+          <span class="text-xs font-bold text-amber-300">Combo</span>
+          <span id="hud-combo" class="font-mono-num text-xs font-extrabold text-amber-400">x1.0</span>
+        </div>
+
+        <div class="flex items-center gap-1 bg-slate-900/90 border border-slate-800 rounded-xl px-2 py-1.5">
+          <span class="text-amber-400 text-xs">★</span>
+          <span id="hud-rep" class="font-mono-num text-xs sm:text-sm font-bold text-slate-100">4.5</span>
+        </div>
+      </div>
+
+      <!-- Right: Market & Audio Mute -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button id="btn-market-open" class="btn-tactile relative flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs sm:text-sm rounded-xl px-3 py-1.5 shadow-lg shadow-orange-500/20">
+          <span>🛒 Market</span>
+          <span id="market-low-badge" class="hidden absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center border border-slate-950">!</span>
+        </button>
+
+        <button id="btn-mute" aria-label="Toggle Sound" class="btn-tactile w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-200 text-sm">
+          <span id="icon-sound-state">🔊</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CENTER: INTERACTIVE TOP-DOWN 2D RESTAURANT CANVAS -->
+  <main id="canvas-wrapper" class="relative flex-1 w-full min-h-0 overflow-hidden bg-[#131a29]">
+    <canvas id="restaurant-canvas" class="block w-full h-full cursor-pointer"></canvas>
+
+    <!-- Floating Contextual Guide Pill (Non-intrusive, updates smoothly only on text change) -->
+    <div class="absolute top-2.5 left-1/2 -translate-x-1/2 pointer-events-none z-10 w-[92%] max-w-md flex justify-center">
+      <div id="live-hint-pill" class="px-3.5 py-1 rounded-full bg-slate-950/80 border border-slate-700/70 backdrop-blur-md text-[11px] sm:text-xs font-bold text-amber-300 shadow-lg text-center truncate">
+        Guests are arriving! Tap a glowing dish below to cook.
+      </div>
+    </div>
+
+    <!-- Floating Quick Action: Add Burner -->
+    <button id="btn-upgrade-stove" class="btn-tactile absolute top-2.5 right-2.5 z-10 text-[11px] font-extrabold bg-indigo-950/90 hover:bg-indigo-900 text-indigo-200 border border-indigo-400/40 rounded-xl px-2.5 py-1.5 shadow-lg backdrop-blur-md">
+      + Burner ($120)
+    </button>
+  </main>
+
+  <!-- BOTTOM DOCK: PANTRY STOCK & DISH COOKING BUTTONS -->
+  <footer class="w-full glass-panel border-t border-slate-800 safe-pb safe-pl safe-pr pt-2 px-3 z-30 shrink-0">
+    <div class="max-w-6xl mx-auto flex flex-col gap-2">
+      <!-- Compact Pantry Bar -->
+      <div class="flex items-center justify-between gap-2 overflow-x-auto pb-1 border-b border-slate-800/80">
+        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0">Pantry Stock:</span>
+        <div id="pantry-strip" class="flex items-center gap-1.5 flex-wrap justify-end"></div>
+      </div>
+
+      <!-- 4 Dish Action Cards -->
+      <div id="recipes-container" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+    </div>
+  </footer>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-40 pointer-events-none flex flex-col items-center gap-1.5 w-[90%] max-w-sm"></div>
+
+  <!-- MODAL 1: WHOLESALE MARKET & UPGRADES -->
+  <div id="modal-market" class="fixed inset-0 z-40 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 safe-pt safe-pb safe-pl safe-pr">
+    <div class="glass-card w-full max-w-2xl max-h-[88dvh] rounded-3xl flex flex-col overflow-hidden animate-modal">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+        <div>
+          <h2 class="text-lg font-extrabold text-white">Wholesale Market & Upgrades</h2>
+          <p class="text-xs text-slate-400">Buy fresh ingredients or upgrade kitchen equipment</p>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <div class="bg-emerald-950/90 border border-emerald-500/40 rounded-xl px-3 py-1 text-emerald-300 font-mono-num font-extrabold text-sm">
+            $<span id="market-money">0</span>
+          </div>
+          <button id="btn-market-close" class="btn-tactile w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-bold">✕</button>
+        </div>
+      </div>
+
+      <div class="flex gap-3 px-5 pt-3 border-b border-slate-800">
+        <button id="tab-ingredients" class="pb-2.5 px-2 text-xs font-extrabold border-b-2 border-amber-400 text-amber-400">Ingredients</button>
+        <button id="tab-upgrades" class="pb-2.5 px-2 text-xs font-extrabold border-b-2 border-transparent text-slate-400 hover:text-slate-200">Kitchen Upgrades</button>
+      </div>
+
+      <div id="market-body" class="p-4 sm:p-5 scroll-y-safe flex-1 space-y-2.5"></div>
+
+      <div class="px-5 py-3 bg-slate-900/95 border-t border-slate-800 flex items-center justify-between gap-2">
+        <button id="btn-restock-all" class="btn-tactile text-xs font-bold bg-emerald-600/25 hover:bg-emerald-600/35 text-emerald-300 border border-emerald-500/40 rounded-xl px-3 py-2">
+          Restock All (+3 each)
+        </button>
+        <button id="btn-market-resume" class="btn-tactile bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm rounded-xl px-5 py-2">
+          Back to Restaurant
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: END OF DAY REPORT -->
+  <div id="modal-shift-end" class="fixed inset-0 z-40 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 safe-pt safe-pb">
+    <div class="glass-card w-full max-w-md rounded-3xl p-6 text-center animate-modal space-y-4">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-2xl shadow-lg">🍽️</div>
+      <div>
+        <div class="text-xs font-bold uppercase tracking-widest text-amber-400">Shift Complete</div>
+        <h2 class="text-2xl font-extrabold text-white mt-0.5">Day <span id="summary-day">1</span> Summary</h2>
+      </div>
+
+      <div class="bg-slate-900/90 rounded-2xl p-4 border border-slate-800 space-y-2.5 text-sm">
+        <div class="flex justify-between">
+          <span class="text-slate-400">Guests Served</span>
+          <span id="summary-served" class="font-mono-num font-bold text-white">0</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Revenue & Tips</span>
+          <span id="summary-earned" class="font-mono-num font-bold text-emerald-400">+$0</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Left Unserved</span>
+          <span id="summary-missed" class="font-mono-num font-bold text-rose-400">0</span>
+        </div>
+        <div class="border-t border-slate-800 pt-2 flex justify-between">
+          <span class="text-slate-300 font-semibold">Total Cash</span>
+          <span id="summary-balance" class="font-mono-num font-extrabold text-amber-300">$0</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5 pt-1">
+        <button id="btn-summary-market" class="btn-tactile bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-sm rounded-xl py-3">
+          Open Market
+        </button>
+        <button id="btn-next-day" class="btn-tactile bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm rounded-xl py-3 shadow-lg">
+          Start Day <span id="summary-next-day">2</span> →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: MAIN MENU, SAVE SLOTS & AUTO-UPDATE -->
+  <div id="modal-main-menu" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-lg flex items-center justify-center p-3 sm:p-5 safe-pt safe-pb safe-pl safe-pr">
+    <div class="glass-card w-full max-w-xl max-h-[90dvh] rounded-3xl flex flex-col overflow-hidden animate-modal">
+      <div class="p-5 bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/30 border-b border-slate-800 flex items-start justify-between">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-600 flex items-center justify-center shadow-lg shrink-0 text-2xl">👨‍🍳</div>
+          <div>
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">Bistro Rush</h1>
+            <p class="text-xs text-slate-400">Top-Down Kitchen & Dining Tycoon</p>
+          </div>
+        </div>
+        <button id="btn-menu-close" class="hidden btn-tactile w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <div class="p-5 scroll-y-safe flex-1 space-y-4">
+        <!-- Clear 3-Step Visual Guide -->
+        <div class="grid grid-cols-3 gap-2 bg-slate-900/80 border border-slate-800 rounded-2xl p-3 text-center">
+          <div>
+            <div class="text-lg mb-0.5">🚶‍♂️💬</div>
+            <div class="text-[11px] font-bold text-slate-200">1. Guests Queue</div>
+            <div class="text-[10px] text-slate-400">See dish bubble</div>
+          </div>
+          <div>
+            <div class="text-lg mb-0.5">🍳🔥</div>
+            <div class="text-[11px] font-bold text-slate-200">2. Tap Dish Below</div>
+            <div class="text-[10px] text-slate-400">Chef cooks on stove</div>
+          </div>
+          <div>
+            <div class="text-lg mb-0.5">🛎️💰</div>
+            <div class="text-[11px] font-bold text-slate-200">3. Tap Ready Plate</div>
+            <div class="text-[10px] text-slate-400">Guest sits & pays</div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Save Slots</h3>
+            <span class="text-[11px] text-slate-400">Auto-saved</span>
+          </div>
+          <div id="save-slots-list" class="space-y-2"></div>
+        </div>
+
+        <div class="bg-slate-900/85 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between">
+          <div>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-amber-400">All-Time Records</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">
+              Best Cash: <span id="highscore-cash" class="font-mono-num text-emerald-400">$0</span>
+              <span class="text-slate-600 mx-1.5">•</span>
+              Best Day: <span id="highscore-day" class="font-mono-num text-amber-300">1</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] text-slate-400">Served Ever</div>
+            <div id="highscore-served" class="font-mono-num text-sm font-bold text-slate-200">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-5 py-3 bg-slate-900/95 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+        <div class="flex items-center gap-2">
+          <span id="app-version-label" class="font-mono-num font-semibold text-slate-500">v2.0.0</span>
+          <span id="update-status-text" class="text-slate-400">Up to date</span>
+        </div>
+        <button id="btn-check-update" class="btn-tactile flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold">
+          <span id="update-spin-icon">↻</span>
+          <span>Check Update</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: NEW GAME NAME DIALOG -->
+  <div id="modal-new-game" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 safe-pt safe-pb">
+    <div class="glass-card w-full max-w-sm rounded-3xl p-5 space-y-4 animate-modal">
+      <h3 class="text-lg font-extrabold text-white">Open New Restaurant</h3>
+      <p class="text-xs text-slate-400">Create a new save in Slot <span id="new-game-slot-num" class="text-white font-bold">1</span>:</p>
+      <input id="input-bistro-name" type="text" maxlength="20" placeholder="e.g. The Golden Skillet" class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white outline-none" style="user-select: text; -webkit-user-select: text;" />
+      <div class="flex gap-2 pt-1">
+        <button id="btn-cancel-new-game" class="btn-tactile flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl py-2.5">Cancel</button>
+        <button id="btn-confirm-new-game" class="btn-tactile flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs rounded-xl py-2.5">Start Cooking</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * BISTRO RUSH v2.0 — FLICKER-FREE TOP-DOWN 2D RESTAURANT & KITCHEN TYCOON
+     * =========================================================================
+     */
+
+    const APP_VERSION = "2.0.1";
+    const STORAGE_KEY_ROOT = "bistro_rush_save_v2";
+
+    // 1. PWA HOME SCREEN ICON GENERATOR
+    (function generatePWAHomeIcon() {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext("2d");
+
+        const bgGrad = ctx.createLinearGradient(0, 0, 512, 512);
+        bgGrad.addColorStop(0, "#1e293b");
+        bgGrad.addColorStop(1, "#0f172a");
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, 512, 512);
+
+        ctx.beginPath();
+        ctx.arc(256, 240, 175, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(245, 158, 11, 0.14)";
+        ctx.fill();
+        ctx.lineWidth = 14;
+        ctx.strokeStyle = "#f59e0b";
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(256, 265, 115, Math.PI, 0, false);
+        ctx.closePath();
+        ctx.fillStyle = "#f8fafc";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(256, 140, 16, 0, Math.PI * 2);
+        ctx.fillStyle = "#f59e0b";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.roundRect(118, 276, 276, 22, 11);
+        ctx.fillStyle = "#f59e0b";
+        ctx.fill();
+
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "800 50px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("BISTRO RUSH", 256, 385);
+
+        const dataUrl = canvas.toDataURL("image/png");
+        let appleIcon = document.querySelector("link[rel='apple-touch-icon']");
+        if (!appleIcon) {
+          appleIcon = document.createElement("link");
+          appleIcon.rel = "apple-touch-icon";
+          document.head.appendChild(appleIcon);
+        }
+        appleIcon.href = dataUrl;
+
+        let favicon = document.querySelector("link[rel='icon']");
+        if (!favicon) {
+          favicon = document.createElement("link");
+          favicon.rel = "icon";
+          favicon.type = "image/png";
+          document.head.appendChild(favicon);
+        }
+        favicon.href = dataUrl;
+      } catch (e) {}
+    })();
+
+    // 2. AUTO-UPDATE CHECKER
+    async function checkForAppUpdate(manual = false) {
+      const statusEl = document.getElementById("update-status-text");
+      const spinIcon = document.getElementById("update-spin-icon");
+      if (spinIcon) spinIcon.classList.add("animate-spin");
+      if (manual && statusEl) statusEl.textContent = "Checking...";
+
+      try {
+        const baseUrl = window.location.href.split("?")[0].split("#")[0];
+        if (!baseUrl.startsWith("http")) {
+          if (manual && statusEl) statusEl.textContent = `Local Build (${APP_VERSION})`;
+          if (spinIcon) spinIcon.classList.remove("animate-spin");
+          return;
+        }
+        const response = await fetch(`${baseUrl}?_cb=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" }
+        });
+        if (response.ok) {
+          const htmlText = await response.text();
+          const match = htmlText.match(/const\s+APP_VERSION\s*=\s*["']([^"']+)["']/);
+          if (match && match[1] && match[1] !== APP_VERSION) {
+            if (statusEl) statusEl.textContent = `Updating to v${match[1]}...`;
+            showToast(`New version v${match[1]} found! Reloading...`, "amber");
+            if ("caches" in window) {
+              const keys = await caches.keys();
+              await Promise.all(keys.map(k => caches.delete(k)));
+            }
+            setTimeout(() => window.location.reload(), 800);
+            return;
+          }
+        }
+        if (statusEl) statusEl.textContent = manual ? "Latest version!" : "Up to date";
+        if (manual) showToast("You have the latest version!", "emerald");
+      } catch (e) {
+        if (statusEl) statusEl.textContent = "Offline ready";
+      } finally {
+        if (spinIcon) spinIcon.classList.remove("animate-spin");
+      }
+    }
+
+    // 3. WEB AUDIO SYNTHESIZER (iOS Touch Unlock)
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+      unlock() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === "suspended") {
+          this.ctx.resume().catch(() => {});
+        }
+      }
+      playTone(freq, type = "sine", duration = 0.12, gainVal = 0.13, delay = 0) {
+        if (this.muted) return;
+        this.unlock();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(gainVal, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration + 0.02);
+      }
+      playSizzle() {
+        this.playTone(230, "triangle", 0.09, 0.12, 0);
+        this.playTone(340, "sine", 0.11, 0.1, 0.05);
+      }
+      playReadyBell() {
+        this.playTone(880, "sine", 0.16, 0.14, 0);
+        this.playTone(1318.5, "sine", 0.24, 0.12, 0.08);
+      }
+      playServeSuccess(combo = 1) {
+        const boost = Math.min(combo * 24, 180);
+        this.playTone(523.25 + boost, "triangle", 0.11, 0.15, 0);
+        this.playTone(659.25 + boost, "triangle", 0.11, 0.15, 0.06);
+        this.playTone(783.99 + boost, "sine", 0.2, 0.16, 0.12);
+      }
+      playCashRegister() {
+        this.playTone(987.77, "sine", 0.09, 0.13, 0);
+        this.playTone(1318.51, "sine", 0.2, 0.15, 0.06);
+      }
+      playError() {
+        this.playTone(165, "sawtooth", 0.13, 0.11, 0);
+        this.playTone(130, "sawtooth", 0.16, 0.11, 0.07);
+      }
+    }
+
+    const sfx = new SoundEngine();
+    ["touchstart", "mousedown", "keydown"].forEach(evt => {
+      window.addEventListener(evt, () => sfx.unlock(), { passive: true });
+    });
+
+    // 4. GAME DATA DEFINITIONS
+    const INGREDIENTS = {
+      bun:     { id: "bun",     name: "Brioche Bun",   icon: "🍞", unitCost: 3, packSize: 4, packCost: 10 },
+      patty:   { id: "patty",   name: "Prime Beef",    icon: "🥩", unitCost: 5, packSize: 4, packCost: 18 },
+      cheese:  { id: "cheese",  name: "Aged Cheddar",  icon: "🧀", unitCost: 3, packSize: 4, packCost: 10 },
+      greens:  { id: "greens",  name: "Crisp Greens",  icon: "🥬", unitCost: 2, packSize: 5, packCost: 9  },
+      pasta:   { id: "pasta",   name: "Fresh Pasta",   icon: "🍝", unitCost: 4, packSize: 4, packCost: 14 },
+      truffle: { id: "truffle", name: "Black Truffle", icon: "🍄", unitCost: 7, packSize: 3, packCost: 19 },
+      salmon:  { id: "salmon",  name: "Wild Salmon",   icon: "🐟", unitCost: 6, packSize: 3, packCost: 16 }
+    };
+
+    const RECIPES = [
+      {
+        id: "burger",
+        name: "Smash Burger",
+        icon: "🍔",
+        price: 22,
+        cookTime: 3.4,
+        unlockDay: 1,
+        ingredients: { bun: 1, patty: 1, cheese: 1 },
+        color: "#f59e0b",
+        accent: "from-amber-500/20 to-orange-600/20 border-amber-500/40"
+      },
+      {
+        id: "salad",
+        name: "Garden Bowl",
+        icon: "🥗",
+        price: 15,
+        cookTime: 2.3,
+        unlockDay: 1,
+        ingredients: { greens: 2, cheese: 1 },
+        color: "#10b981",
+        accent: "from-emerald-500/20 to-teal-600/20 border-emerald-500/40"
+      },
+      {
+        id: "pasta",
+        name: "Truffle Pasta",
+        icon: "🍝",
+        price: 34,
+        cookTime: 4.4,
+        unlockDay: 1,
+        ingredients: { pasta: 1, truffle: 1, cheese: 1 },
+        color: "#a855f7",
+        accent: "from-purple-500/20 to-indigo-600/20 border-purple-500/40"
+      },
+      {
+        id: "salmon_plate",
+        name: "Seared Salmon",
+        icon: "🍣",
+        price: 38,
+        cookTime: 4.8,
+        unlockDay: 2,
+        ingredients: { salmon: 1, greens: 1, truffle: 1 },
+        color: "#f43f5e",
+        accent: "from-rose-500/20 to-pink-600/20 border-rose-500/40"
+      }
+    ];
+
+    const UPGRADES = [
+      {
+        id: "stoveSpeed",
+        name: "Turbo Induction Burners",
+        desc: "Cooks all dishes 15% faster per level",
+        icon: "🔥",
+        baseCost: 85,
+        costMult: 1.65,
+        maxLevel: 5
+      },
+      {
+        id: "tipBonus",
+        name: "Artisan Plating & Ambiance",
+        desc: "Increases customer payments & tips by +15%",
+        icon: "✨",
+        baseCost: 95,
+        costMult: 1.7,
+        maxLevel: 5
+      },
+      {
+        id: "patienceBoost",
+        name: "Complimentary Sparkling Water",
+        desc: "Guests wait +20% longer in queue",
+        icon: "🥂",
+        baseCost: 75,
+        costMult: 1.6,
+        maxLevel: 4
+      }
+    ];
+
+    const CUSTOMER_STYLES = [
+      { name: "Food Critic",   shirt: "#f59e0b", hair: "#1e293b", isVip: true,  tipMult: 1.45, patienceSec: 25 },
+      { name: "Local Regular", shirt: "#38bdf8", hair: "#78350f", isVip: false, tipMult: 1.0,  patienceSec: 30 },
+      { name: "Chef Student",  shirt: "#34d399", hair: "#0f172a", isVip: false, tipMult: 1.1,  patienceSec: 28 },
+      { name: "Tech Founder",  shirt: "#a78bfa", hair: "#334155", isVip: true,  tipMult: 1.35, patienceSec: 24 },
+      { name: "Artisan Baker", shirt: "#fb7185", hair: "#92400e", isVip: false, tipMult: 1.15, patienceSec: 29 }
+    ];
+
+    // 5. PERSISTENT SAVE STORAGE
+    function createDefaultSlotData(name = "The Golden Skillet") {
+      return {
+        bistroName: name,
+        updatedAt: Date.now(),
+        day: 1,
+        money: 65,
+        reputation: 4.5,
+        totalServed: 0,
+        burners: 2,
+        inventory: { bun: 6, patty: 6, cheese: 7, greens: 7, pasta: 4, truffle: 4, salmon: 3 },
+        upgrades: { stoveSpeed: 0, tipBonus: 0, patienceBoost: 0 }
+      };
+    }
+
+    function loadStorageRoot() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_ROOT);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.slots)) return parsed;
+        }
+      } catch (e) {}
+      return {
+        schemaVersion: 2,
+        muted: false,
+        activeSlotIndex: 0,
+        highscores: { bestCash: 65, bestDay: 1, totalDishesEver: 0 },
+        slots: [createDefaultSlotData("The Golden Skillet"), null, null]
+      };
+    }
+
+    let storageRoot = loadStorageRoot();
+    sfx.muted = !!storageRoot.muted;
+
+    function persistStorage() {
+      try {
+        const slot = storageRoot.slots[storageRoot.activeSlotIndex];
+        if (slot) {
+          slot.updatedAt = Date.now();
+          if (slot.money > storageRoot.highscores.bestCash) storageRoot.highscores.bestCash = slot.money;
+          if (slot.day > storageRoot.highscores.bestDay) storageRoot.highscores.bestDay = slot.day;
+        }
+        storageRoot.muted = sfx.muted;
+        localStorage.setItem(STORAGE_KEY_ROOT, JSON.stringify(storageRoot));
+      } catch (e) {}
+    }
+
+    function getActiveSave() {
+      let slot = storageRoot.slots[storageRoot.activeSlotIndex];
+      if (!slot) {
+        slot = createDefaultSlotData("The Golden Skillet");
+        storageRoot.slots[storageRoot.activeSlotIndex] = slot;
+      }
+      return slot;
+    }
+
+    // 6. TOP-DOWN 2D WORLD STATE & ENTITIES
+    const SHIFT_DURATION = 80;
+    const canvas = document.getElementById("restaurant-canvas");
+    const ctx = canvas.getContext("2d");
+
+    let viewMetrics = {
+      width: 800,
+      height: 500,
+      kitchenBottomY: 220,
+      counterY: 230,
+      doorPos: { x: 80, y: 470 },
+      queueSpots: [],
+      tables: [],
+      stoveRects: []
+    };
+
+    let gameState = {
+      isPlaying: false,
+      isPaused: false,
+      shiftTimeLeft: SHIFT_DURATION,
+      spawnCooldown: 0.6,
+      combo: 1.0,
+      shiftStats: { served: 0, earned: 0, missed: 0 },
+      stations: [],    // { index, status: 'empty'|'cooking'|'ready'|'burned', recipeId, progress, duration, burnProgress, hitRect }
+      customers: [],   // { uid, style, recipeId, state: 'entering'|'queuing'|'walkingToTable'|'eating'|'leaving', queueIdx, tableIdx, x, y, targetX, targetY, patience, maxPatience, eatTimer, bobPhase }
+      chef: { x: 400, y: 120, targetX: 400, targetY: 120, bob: 0 },
+      tableTips: [],   // { tableIdx, amount, x, y, hitRect }
+      particles: [],
+      floatingTexts: []
+    };
+
+    function computeWorldLayout() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const W = rect.width;
+      const H = rect.height;
+      viewMetrics.width = W;
+      viewMetrics.height = H;
+
+      // Top 42% is the Kitchen, Middle is the Service Counter, Bottom 58% is the Dining Hall
+      const kitchenH = Math.max(145, Math.min(230, H * 0.42));
+      viewMetrics.kitchenBottomY = kitchenH;
+      viewMetrics.counterY = kitchenH;
+
+      // Entrance Door on Bottom-Left
+      viewMetrics.doorPos = { x: Math.max(46, W * 0.12), y: H - 14 };
+
+      // Queue Spots leading up to the Left-Center Order Counter
+      const queueX = Math.max(64, W * 0.22);
+      const firstQueueY = kitchenH + 54;
+      const queueSpacing = Math.min(54, Math.max(40, (H - firstQueueY - 46) / 3.2));
+      viewMetrics.queueSpots = [
+        { x: queueX, y: firstQueueY },
+        { x: queueX, y: firstQueueY + queueSpacing },
+        { x: queueX, y: firstQueueY + queueSpacing * 2 },
+        { x: queueX, y: firstQueueY + queueSpacing * 3 }
+      ];
+
+      // Dining Tables on the Right Side of Dining Hall
+      const diningStartX = Math.max(queueX + 95, W * 0.46);
+      const diningW = W - diningStartX - 24;
+      const diningTopY = kitchenH + 58;
+      const diningH = H - diningTopY - 26;
+
+      const cols = diningW >= 290 ? 2 : 2;
+      const rows = diningH >= 190 ? 2 : 2;
+      const tables = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const tx = diningStartX + (diningW / cols) * (c + 0.5);
+          const ty = diningTopY + (diningH / rows) * (r + 0.5);
+          tables.push({
+            index: r * cols + c,
+            x: tx,
+            y: ty,
+            occupiedBy: null
+          });
+        }
+      }
+      viewMetrics.tables = tables;
+
+      // Update Chef idle position
+      if (!gameState.isPlaying) {
+        gameState.chef.x = W * 0.5;
+        gameState.chef.y = kitchenH * 0.48;
+      }
+    }
+
+    window.addEventListener("resize", computeWorldLayout);
+
+    function initStationsFromSave() {
+      const save = getActiveSave();
+      gameState.stations = [];
+      for (let i = 0; i < save.burners; i++) {
+        gameState.stations.push({
+          index: i,
+          status: "empty",
+          recipeId: null,
+          progress: 0,
+          duration: 1,
+          burnProgress: 0,
+          hitRect: null
+        });
+      }
+    }
+
+    // 7. PARTICLES & FLOATING TEXTS
+    function spawnBurst(x, y, color = "#fbbf24", count = 14) {
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
+        const speed = 45 + Math.random() * 110;
+        gameState.particles.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 20,
+          size: 2.5 + Math.random() * 3.5,
+          color,
+          life: 0.55 + Math.random() * 0.25,
+          maxLife: 0.8
+        });
+      }
+    }
+
+    function spawnFloatingText(x, y, text, color = "#34d399") {
+      gameState.floatingTexts.push({ x, y, text, color, life: 1.1, vy: -38 });
+    }
+
+    function showToast(msg, tone = "slate") {
+      const container = document.getElementById("toast-container");
+      const el = document.createElement("div");
+      const styles = {
+        emerald: "bg-emerald-950/95 border-emerald-500/50 text-emerald-200",
+        amber: "bg-amber-950/95 border-amber-500/50 text-amber-200",
+        rose: "bg-rose-950/95 border-rose-500/50 text-rose-200",
+        slate: "bg-slate-900/95 border-slate-600/60 text-slate-100"
+      };
+      el.className = `px-3.5 py-1.5 rounded-xl border text-xs font-bold shadow-xl backdrop-blur-md transition-opacity duration-300 ${styles[tone] || styles.slate}`;
+      el.textContent = msg;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = "0";
+        setTimeout(() => el.remove(), 300);
+      }, 2000);
+    }
+
+    // 8. CORE GAMEPLAY ACTIONS
+    function startShift() {
+      computeWorldLayout();
+      initStationsFromSave();
+      gameState.customers = [];
+      gameState.tableTips = [];
+      gameState.particles = [];
+      gameState.floatingTexts = [];
+      gameState.shiftTimeLeft = SHIFT_DURATION;
+      gameState.spawnCooldown = 0.5;
+      gameState.combo = 1.0;
+      gameState.shiftStats = { served: 0, earned: 0, missed: 0 };
+      gameState.isPlaying = true;
+      gameState.isPaused = false;
+
+      document.getElementById("modal-main-menu").classList.add("hidden");
+      document.getElementById("modal-shift-end").classList.add("hidden");
+      document.getElementById("modal-market").classList.add("hidden");
+      document.getElementById("btn-menu-close").classList.remove("hidden");
+
+      syncStaticDomUI();
+    }
+
+    function spawnCustomer() {
+      const queuingCount = gameState.customers.filter(c => c.state === "entering" || c.state === "queuing").length;
+      if (queuingCount >= viewMetrics.queueSpots.length) return;
+
+      const save = getActiveSave();
+      const unlockedRecipes = RECIPES.filter(r => r.unlockDay <= save.day);
+      const chosenRecipe = unlockedRecipes[Math.floor(Math.random() * unlockedRecipes.length)];
+      const style = CUSTOMER_STYLES[Math.floor(Math.random() * CUSTOMER_STYLES.length)];
+
+      const patienceMult = 1 + (save.upgrades.patienceBoost * 0.20);
+      const dayFactor = Math.max(0.75, 1 - (save.day - 1) * 0.03);
+      const maxPatience = Math.round(style.patienceSec * patienceMult * dayFactor);
+
+      const qIdx = queuingCount;
+      const spot = viewMetrics.queueSpots[qIdx];
+
+      gameState.customers.push({
+        uid: Date.now() + Math.random(),
+        style,
+        recipeId: chosenRecipe.id,
+        state: "entering",
+        queueIdx: qIdx,
+        tableIdx: -1,
+        x: viewMetrics.doorPos.x,
+        y: viewMetrics.doorPos.y,
+        targetX: spot.x,
+        targetY: spot.y,
+        patience: maxPatience,
+        maxPatience,
+        eatTimer: 0,
+        bobPhase: Math.random() * Math.PI * 2
+      });
+
+      syncRecipeHighlights();
+    }
+
+    function reassignQueuePositions() {
+      const queuing = gameState.customers.filter(c => c.state === "entering" || c.state === "queuing");
+      queuing.forEach((c, idx) => {
+        c.queueIdx = idx;
+        const spot = viewMetrics.queueSpots[idx];
+        if (spot) {
+          c.targetX = spot.x;
+          c.targetY = spot.y;
+        }
+      });
+    }
+
+    function startCookingRecipe(recipeId) {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+      const save = getActiveSave();
+      const recipe = RECIPES.find(r => r.id === recipeId);
+      if (!recipe) return;
+
+      const freeStation = gameState.stations.find(s => s.status === "empty");
+      if (!freeStation) {
+        sfx.playError();
+        showToast("All burners busy! Tap a ready plate to serve.", "amber");
+        return;
+      }
+
+      for (const [ingKey, qtyNeeded] of Object.entries(recipe.ingredients)) {
+        if ((save.inventory[ingKey] || 0) < qtyNeeded) {
+          sfx.playError();
+          showToast(`Out of ${INGREDIENTS[ingKey].name}! Buy more in Market.`, "rose");
+          return;
+        }
+      }
+
+      for (const [ingKey, qtyNeeded] of Object.entries(recipe.ingredients)) {
+        save.inventory[ingKey] -= qtyNeeded;
+      }
+
+      const speedMult = 1 + (save.upgrades.stoveSpeed * 0.15);
+      freeStation.status = "cooking";
+      freeStation.recipeId = recipe.id;
+      freeStation.progress = 0;
+      freeStation.duration = recipe.cookTime / speedMult;
+      freeStation.burnProgress = 0;
+
+      // Move Chef toward that burner
+      if (freeStation.hitRect) {
+        gameState.chef.targetX = freeStation.hitRect.x + freeStation.hitRect.w / 2;
+        gameState.chef.targetY = freeStation.hitRect.y + freeStation.hitRect.h + 18;
+        spawnBurst(freeStation.hitRect.x + freeStation.hitRect.w / 2, freeStation.hitRect.y + freeStation.hitRect.h / 2, "#f59e0b", 10);
+      }
+
+      sfx.playSizzle();
+      persistStorage();
+      syncStaticDomUI();
+    }
+
+    function handleStationAction(station) {
+      if (!station) return;
+      const cx = station.hitRect ? station.hitRect.x + station.hitRect.w / 2 : viewMetrics.width / 2;
+      const cy = station.hitRect ? station.hitRect.y + station.hitRect.h / 2 : viewMetrics.kitchenBottomY / 2;
+
+      if (station.status === "burned") {
+        station.status = "empty";
+        station.recipeId = null;
+        station.progress = 0;
+        station.burnProgress = 0;
+        sfx.playTone(190, "triangle", 0.1, 0.12);
+        spawnBurst(cx, cy, "#64748b", 10);
+        showToast("Pan cleaned!", "slate");
+        return;
+      }
+
+      if (station.status === "ready") {
+        // Match guest in queue waiting for this dish (prioritize front of queue)
+        const matchingGuests = gameState.customers
+          .filter(c => (c.state === "entering" || c.state === "queuing") && c.recipeId === station.recipeId)
+          .sort((a, b) => a.queueIdx - b.queueIdx);
+
+        if (matchingGuests.length === 0) {
+          sfx.playError();
+          showToast("No guest in line ordered this dish!", "amber");
+          return;
+        }
+
+        const guest = matchingGuests[0];
+        const recipe = RECIPES.find(r => r.id === station.recipeId);
+        const save = getActiveSave();
+
+        const patienceRatio = guest.patience / guest.maxPatience;
+        const tipUpgradeMult = 1 + (save.upgrades.tipBonus * 0.15);
+        const rawTotal = recipe.price * guest.style.tipMult * tipUpgradeMult * gameState.combo;
+        const speedBonus = patienceRatio > 0.5 ? Math.round(recipe.price * 0.25) : 0;
+        const totalEarned = Math.round(rawTotal + speedBonus);
+
+        save.money += totalEarned;
+        save.totalServed += 1;
+        save.reputation = Math.min(5.0, +(save.reputation + 0.04).toFixed(2));
+        storageRoot.highscores.totalDishesEver += 1;
+
+        gameState.shiftStats.served += 1;
+        gameState.shiftStats.earned += totalEarned;
+        gameState.combo = Math.min(2.5, +(gameState.combo + 0.15).toFixed(2));
+
+        // Clear station & move chef to counter
+        station.status = "empty";
+        station.recipeId = null;
+        station.progress = 0;
+        station.burnProgress = 0;
+        gameState.chef.targetX = cx;
+        gameState.chef.targetY = viewMetrics.counterY - 26;
+
+        // Seat guest at a free table to enjoy meal & leave extra coin tip
+        const freeTable = viewMetrics.tables.find(t => !gameState.customers.some(c => c.tableIdx === t.index && (c.state === "walkingToTable" || c.state === "eating")));
+        if (freeTable) {
+          guest.state = "walkingToTable";
+          guest.tableIdx = freeTable.index;
+          guest.targetX = freeTable.x - 24;
+          guest.targetY = freeTable.y;
+          guest.eatTimer = 4.5;
+        } else {
+          // If all tables full, guest walks out happy with takeaway
+          guest.state = "leaving";
+          guest.targetX = viewMetrics.doorPos.x;
+          guest.targetY = viewMetrics.doorPos.y;
+        }
+
+        reassignQueuePositions();
+
+        sfx.playServeSuccess(gameState.combo);
+        spawnBurst(cx, cy, "#34d399", 16);
+        spawnFloatingText(guest.x, guest.y - 28, `+$${totalEarned}`, "#34d399");
+
+        persistStorage();
+        syncStaticDomUI();
+      }
+    }
+
+    function collectTableTip(tipObj) {
+      const save = getActiveSave();
+      save.money += tipObj.amount;
+      gameState.shiftStats.earned += tipObj.amount;
+      sfx.playCashRegister();
+      spawnBurst(tipObj.x, tipObj.y, "#fbbf24", 12);
+      spawnFloatingText(tipObj.x, tipObj.y - 16, `Tip +$${tipObj.amount}`, "#fbbf24");
+      gameState.tableTips = gameState.tableTips.filter(t => t !== tipObj);
+      persistStorage();
+      syncStaticDomUI();
+    }
+
+    // Canvas Tap / Click Handler (Tap ready stove plates, burned pans, or table coins)
+    canvas.addEventListener("pointerdown", (e) => {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+      const rect = canvas.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+
+      // 1. Check table coin tips first
+      for (const tip of gameState.tableTips) {
+        if (Math.hypot(px - tip.x, py - tip.y) <= 28) {
+          collectTableTip(tip);
+          return;
+        }
+      }
+
+      // 2. Check stove stations
+      for (const st of gameState.stations) {
+        if (st.hitRect && px >= st.hitRect.x && px <= st.hitRect.x + st.hitRect.w && py >= st.hitRect.y && py <= st.hitRect.y + st.hitRect.h) {
+          if (st.status === "ready" || st.status === "burned") {
+            handleStationAction(st);
+            return;
+          }
+        }
+      }
+
+      // 3. Check if player tapped a queuing customer while a matching dish is ready
+      for (const cust of gameState.customers) {
+        if ((cust.state === "queuing" || cust.state === "entering") && Math.hypot(px - cust.x, py - cust.y) <= 34) {
+          const matchingStation = gameState.stations.find(s => s.status === "ready" && s.recipeId === cust.recipeId);
+          if (matchingStation) {
+            handleStationAction(matchingStation);
+            return;
+          }
+        }
+      }
+    });
+
+    function buyBurnerSlot() {
+      const save = getActiveSave();
+      if (save.burners >= 4) return;
+      const cost = save.burners === 2 ? 120 : 240;
+      if (save.money < cost) {
+        sfx.playError();
+        showToast(`Need $${cost} to add another burner!`, "rose");
+        return;
+      }
+      save.money -= cost;
+      save.burners += 1;
+      gameState.stations.push({
+        index: gameState.stations.length,
+        status: "empty",
+        recipeId: null,
+        progress: 0,
+        duration: 1,
+        burnProgress: 0,
+        hitRect: null
+      });
+      sfx.playCashRegister();
+      showToast("New Burner installed!", "emerald");
+      persistStorage();
+      syncStaticDomUI();
+    }
+
+    // 9. TOP-DOWN 2D CANVAS RENDERER (Smooth 60 FPS, Zero Flicker)
+    function drawRestaurantScene(nowSec) {
+      const W = viewMetrics.width;
+      const H = viewMetrics.height;
+      const kY = viewMetrics.kitchenBottomY;
+
+      ctx.clearRect(0, 0, W, H);
+
+      // --- A. DINING HALL FLOOR (Warm Wood Planks) ---
+      ctx.fillStyle = "#1c1917";
+      ctx.fillRect(0, kY, W, H - kY);
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.035)";
+      ctx.lineWidth = 1;
+      const plankH = 26;
+      for (let y = kY; y < H; y += plankH) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(W, y);
+        ctx.stroke();
+      }
+
+      // Queue Carpet Runner (Entrance to Order Counter)
+      const qSpot0 = viewMetrics.queueSpots[0];
+      if (qSpot0) {
+        ctx.fillStyle = "rgba(180, 83, 9, 0.16)";
+        ctx.beginPath();
+        ctx.roundRect(qSpot0.x - 28, kY + 14, 56, H - kY - 22, 14);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(245, 158, 11, 0.25)";
+        ctx.stroke();
+      }
+
+      // Entrance Mat (Bottom Left)
+      const door = viewMetrics.doorPos;
+      ctx.fillStyle = "#0f172a";
+      ctx.beginPath();
+      ctx.roundRect(door.x - 34, H - 16, 68, 16, { tl: 8, tr: 8, bl: 0, br: 0 });
+      ctx.fill();
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "700 9px 'Plus Jakarta Sans', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("ENTRANCE", door.x, H - 5);
+
+      // --- B. KITCHEN TILE FLOOR (Top Section) ---
+      ctx.fillStyle = "#0f172a";
+      ctx.fillRect(0, 0, W, kY);
+      const tileSize = 28;
+      ctx.fillStyle = "rgba(255,255,255,0.025)";
+      for (let tx = 0; tx < W; tx += tileSize) {
+        for (let ty = 0; ty < kY; ty += tileSize) {
+          if (((tx / tileSize) + (ty / tileSize)) % 2 === 0) {
+            ctx.fillRect(tx, ty, tileSize, tileSize);
+          }
+        }
+      }
+
+      // --- C. SERVICE COUNTER & PICKUP PASS ---
+      ctx.fillStyle = "#334155";
+      ctx.fillRect(0, kY - 10, W, 20);
+      ctx.fillStyle = "#475569";
+      ctx.fillRect(0, kY - 10, W, 5);
+
+      // Order Register on Left Side of Counter
+      if (qSpot0) {
+        ctx.fillStyle = "#1e293b";
+        ctx.beginPath();
+        ctx.roundRect(qSpot0.x - 24, kY - 16, 48, 28, 6);
+        ctx.fill();
+        ctx.strokeStyle = "#f59e0b";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fillStyle = "#fbbf24";
+        ctx.font = "800 9px 'Plus Jakarta Sans', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("ORDER", qSpot0.x, kY + 1);
+      }
+
+      // --- D. STOVE BURNERS (Top Kitchen Counter) ---
+      const numStations = gameState.stations.length;
+      const maxStoveAreaW = Math.min(W - 32, numStations * 135);
+      const stationW = Math.min(118, (maxStoveAreaW - (numStations - 1) * 12) / numStations);
+      const stationH = Math.min(88, kY - 58);
+      const startStoveX = (W - (numStations * stationW + (numStations - 1) * 12)) / 2;
+      const stoveY = 38;
+
+      gameState.stations.forEach((st, idx) => {
+        const sx = startStoveX + idx * (stationW + 12);
+        const sy = stoveY;
+        st.hitRect = { x: sx, y: sy, w: stationW, h: stationH };
+
+        // Stove Base
+        ctx.fillStyle = st.status === "ready" ? "rgba(6, 78, 59, 0.85)" : (st.status === "burned" ? "rgba(127, 29, 29, 0.85)" : "#1e293b");
+        ctx.beginPath();
+        ctx.roundRect(sx, sy, stationW, stationH, 14);
+        ctx.fill();
+
+        ctx.lineWidth = st.status === "ready" ? 2.5 : 1.5;
+        ctx.strokeStyle = st.status === "ready" ? "#34d399" : (st.status === "cooking" ? "#f59e0b" : (st.status === "burned" ? "#f43f5e" : "rgba(148, 163, 184, 0.25)"));
+        ctx.stroke();
+
+        const cx = sx + stationW / 2;
+        const cy = sy + stationH / 2;
+
+        // Burner Coil Ring
+        ctx.beginPath();
+        ctx.arc(cx, cy - 4, 21, 0, Math.PI * 2);
+        ctx.strokeStyle = st.status === "cooking" ? "rgba(249, 115, 22, 0.75)" : "rgba(100, 116, 139, 0.3)";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        if (st.status === "empty") {
+          ctx.fillStyle = "#64748b";
+          ctx.font = "700 10px 'Plus Jakarta Sans', sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(`Burner #${idx + 1}`, cx, sy + stationH - 10);
+        } else {
+          const recipe = RECIPES.find(r => r.id === st.recipeId);
+          // Dish Icon
+          ctx.font = "28px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          const bob = st.status === "cooking" ? Math.sin(nowSec * 14) * 2 : (st.status === "ready" ? Math.sin(nowSec * 6) * 2.5 : 0);
+          ctx.fillText(st.status === "burned" ? "💨" : recipe.icon, cx, cy - 6 + bob);
+          ctx.textBaseline = "alphabetic";
+
+          if (st.status === "cooking") {
+            const pct = Math.min(1, st.progress / st.duration);
+            ctx.fillStyle = "#0f172a";
+            ctx.beginPath();
+            ctx.roundRect(sx + 12, sy + stationH - 14, stationW - 24, 6, 3);
+            ctx.fill();
+            ctx.fillStyle = "#f59e0b";
+            ctx.beginPath();
+            ctx.roundRect(sx + 12, sy + stationH - 14, (stationW - 24) * pct, 6, 3);
+            ctx.fill();
+          } else if (st.status === "ready") {
+            // Pulsing Serve Badge
+            ctx.fillStyle = "#10b981";
+            ctx.beginPath();
+            ctx.roundRect(sx + 8, sy + stationH - 19, stationW - 16, 15, 6);
+            ctx.fill();
+            ctx.fillStyle = "#022c22";
+            ctx.font = "800 9px 'Plus Jakarta Sans', sans-serif";
+            ctx.fillText("TAP TO SERVE", cx, sy + stationH - 8.5);
+          } else if (st.status === "burned") {
+            ctx.fillStyle = "#fda4af";
+            ctx.font = "800 9px 'Plus Jakarta Sans', sans-serif";
+            ctx.fillText("TAP TO CLEAN", cx, sy + stationH - 8);
+          }
+        }
+      });
+
+      // --- E. CHEF CHARACTER (Top-Down) ---
+      const chef = gameState.chef;
+      // Chef Shadow
+      ctx.fillStyle = "rgba(0,0,0,0.35)";
+      ctx.beginPath();
+      ctx.ellipse(chef.x, chef.y + 12, 14, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Chef Body
+      ctx.fillStyle = "#f8fafc";
+      ctx.beginPath();
+      ctx.arc(chef.x, chef.y, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      // Chef Toque Hat
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(chef.x, chef.y - 3, 9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // --- F. DINING TABLES & CHAIRS ---
+      viewMetrics.tables.forEach(tbl => {
+        // Chairs (Left & Right)
+        ctx.fillStyle = "#44403c";
+        ctx.beginPath();
+        ctx.roundRect(tbl.x - 32, tbl.y - 10, 10, 20, 4);
+        ctx.roundRect(tbl.x + 22, tbl.y - 10, 10, 20, 4);
+        ctx.fill();
+
+        // Table Top
+        ctx.fillStyle = "#78350f";
+        ctx.beginPath();
+        ctx.arc(tbl.x, tbl.y, 22, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#b45309";
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Inner Tablecloth Accent
+        ctx.fillStyle = "#92400e";
+        ctx.beginPath();
+        ctx.arc(tbl.x, tbl.y, 14, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // --- G. CUSTOMERS (Walking, Queuing with Order Bubbles, Eating) ---
+      gameState.customers.forEach(cust => {
+        const walkBob = (cust.state === "entering" || cust.state === "walkingToTable" || cust.state === "leaving")
+          ? Math.sin(nowSec * 12 + cust.bobPhase) * 2.5
+          : 0;
+
+        // Shadow
+        ctx.fillStyle = "rgba(0,0,0,0.35)";
+        ctx.beginPath();
+        ctx.ellipse(cust.x, cust.y + 13, 13, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Shoulders / Shirt
+        ctx.fillStyle = cust.style.shirt;
+        ctx.beginPath();
+        ctx.arc(cust.x, cust.y + walkBob, 13, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#0f172a";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Head
+        ctx.fillStyle = "#fde68a";
+        ctx.beginPath();
+        ctx.arc(cust.x, cust.y - 2 + walkBob, 8.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // VIP Crown Dot
+        if (cust.style.isVip) {
+          ctx.fillStyle = "#fbbf24";
+          ctx.beginPath();
+          ctx.arc(cust.x, cust.y - 12 + walkBob, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Order Speech Bubble (When queuing or entering)
+        if (cust.state === "entering" || cust.state === "queuing") {
+          const recipe = RECIPES.find(r => r.id === cust.recipeId);
+          const isDishReady = gameState.stations.some(s => s.status === "ready" && s.recipeId === cust.recipeId);
+          const bx = cust.x + 28;
+          const by = cust.y - 14;
+
+          ctx.fillStyle = isDishReady ? "#065f46" : "#0f172a";
+          ctx.beginPath();
+          ctx.roundRect(bx - 18, by - 16, 48, 30, 9);
+          ctx.fill();
+          ctx.lineWidth = isDishReady ? 2 : 1.2;
+          ctx.strokeStyle = isDishReady ? "#34d399" : "#475569";
+          ctx.stroke();
+
+          // Dish Emoji in Bubble
+          ctx.font = "17px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(recipe.icon, bx + 4, by - 2);
+          ctx.textBaseline = "alphabetic";
+
+          // Patience Mini-Bar inside bubble
+          const pRatio = Math.max(0, cust.patience / cust.maxPatience);
+          ctx.fillStyle = "#1e293b";
+          ctx.fillRect(bx - 12, by + 8, 36, 3.5);
+          ctx.fillStyle = pRatio > 0.5 ? "#34d399" : (pRatio > 0.25 ? "#fbbf24" : "#f43f5e");
+          ctx.fillRect(bx - 12, by + 8, 36 * pRatio, 3.5);
+        }
+
+        // Plate on Table while Eating
+        if (cust.state === "eating" && cust.tableIdx >= 0) {
+          const tbl = viewMetrics.tables[cust.tableIdx];
+          const recipe = RECIPES.find(r => r.id === cust.recipeId);
+          if (tbl && recipe) {
+            ctx.font = "16px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(recipe.icon, tbl.x, tbl.y);
+            ctx.textBaseline = "alphabetic";
+          }
+        }
+      });
+
+      // --- H. COLLECTIBLE TABLE TIPS (Gold Coins on Tables) ---
+      gameState.tableTips.forEach(tip => {
+        const pulse = Math.sin(nowSec * 6) * 2;
+        ctx.fillStyle = "#fbbf24";
+        ctx.beginPath();
+        ctx.arc(tip.x, tip.y + pulse, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#fef08a";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#451a03";
+        ctx.font = "800 10px 'JetBrains Mono', monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(`$${tip.amount}`, tip.x, tip.y + pulse);
+        ctx.textBaseline = "alphabetic";
+      });
+
+      // --- I. PARTICLES & FLOATING TEXTS ---
+      gameState.particles.forEach(p => {
+        ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+
+      gameState.floatingTexts.forEach(ft => {
+        ctx.globalAlpha = Math.min(1, ft.life * 1.4);
+        ctx.font = "800 16px 'Plus Jakarta Sans', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#090d16";
+        ctx.fillText(ft.text, ft.x + 1.5, ft.y + 1.5);
+        ctx.fillStyle = ft.color;
+        ctx.fillText(ft.text, ft.x, ft.y);
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    // 10. THROTTLED HUD & STATIC DOCK UPDATES (Only updates when values actually change!)
+    let lastHintText = "";
+    function updateContextualHint() {
+      let nextHint = "Watch the queue! Tap a glowing dish below to start cooking.";
+      const hasReady = gameState.stations.some(s => s.status === "ready");
+      const hasBurned = gameState.stations.some(s => s.status === "burned");
+      const hasTip = gameState.tableTips.length > 0;
+
+      if (hasBurned) {
+        nextHint = "⚠️ A dish overcooked! Tap the smoking burner to clean it.";
+      } else if (hasReady) {
+        nextHint = "🛎️ Order ready! Tap the glowing plate on the stove to serve!";
+      } else if (hasTip) {
+        nextHint = "💰 Tap the gold coins on the dining tables to collect tips!";
+      } else if (gameState.customers.some(c => c.state === "queuing" || c.state === "entering")) {
+        const firstGuest = gameState.customers.find(c => c.state === "queuing" || c.state === "entering");
+        const rec = RECIPES.find(r => r.id === firstGuest.recipeId);
+        if (rec) nextHint = `Guest wants ${rec.icon} ${rec.name} — tap it below to cook!`;
+      }
+
+      if (nextHint !== lastHintText) {
+        lastHintText = nextHint;
+        document.getElementById("live-hint-pill").textContent = nextHint;
+      }
+    }
+
+    function syncRecipeHighlights() {
+      const save = getActiveSave();
+      const neededIds = new Set(
+        gameState.customers
+          .filter(c => c.state === "entering" || c.state === "queuing")
+          .map(c => c.recipeId)
+      );
+
+      document.querySelectorAll(".recipe-cook-btn").forEach(btn => {
+        const rid = btn.getAttribute("data-recipe");
+        const recipe = RECIPES.find(r => r.id === rid);
+        let hasIngredients = true;
+        if (recipe) {
+          for (const [k, qty] of Object.entries(recipe.ingredients)) {
+            if ((save.inventory[k] || 0) < qty) hasIngredients = false;
+          }
+        }
+        const isOrdered = neededIds.has(rid);
+        btn.classList.toggle("ring-2", isOrdered && hasIngredients);
+        btn.classList.toggle("ring-amber-400", isOrdered && hasIngredients);
+      });
+    }
+
+    function syncStaticDomUI() {
+      const save = getActiveSave();
+      document.getElementById("hud-bistro-name").textContent = save.bistroName;
+      document.getElementById("hud-day").textContent = save.day;
+      document.getElementById("hud-money").textContent = save.money;
+      document.getElementById("hud-rep").textContent = save.reputation.toFixed(1);
+      document.getElementById("hud-combo").textContent = `x${gameState.combo.toFixed(1)}`;
+
+      const anyLow = Object.values(save.inventory).some(q => q <= 1);
+      document.getElementById("market-low-badge").classList.toggle("hidden", !anyLow);
+
+      const btnBurner = document.getElementById("btn-upgrade-stove");
+      if (save.burners >= 4) {
+        btnBurner.textContent = "Max Burners (4/4)";
+        btnBurner.disabled = true;
+      } else {
+        const cost = save.burners === 2 ? 120 : 240;
+        btnBurner.textContent = `+ Burner ($${cost})`;
+        btnBurner.disabled = false;
+      }
+
+      // Render Pantry Pills
+      const pantryStrip = document.getElementById("pantry-strip");
+      pantryStrip.innerHTML = Object.values(INGREDIENTS).map(ing => {
+        const qty = save.inventory[ing.id] || 0;
+        const cls = qty === 0 ? "border-rose-500/60 bg-rose-950/50 text-rose-300" : (qty <= 2 ? "border-amber-500/50 bg-amber-950/40 text-amber-200" : "border-slate-700/70 bg-slate-900/80 text-slate-200");
+        return `<div class="flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[11px] font-bold ${cls}"><span>${ing.icon}</span><span class="font-mono-num">${qty}</span></div>`;
+      }).join("");
+
+      // Render Dish Action Cards
+      const recipesContainer = document.getElementById("recipes-container");
+      recipesContainer.innerHTML = RECIPES.map(recipe => {
+        if (recipe.unlockDay > save.day) {
+          return `
+            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-2.5 flex flex-col items-center justify-center text-center opacity-55">
+              <span class="text-sm">🔒 ${recipe.name}</span>
+              <span class="text-[10px] text-amber-400 font-semibold mt-0.5">Unlocks Day ${recipe.unlockDay}</span>
+            </div>
+          `;
+        }
+        let canCook = true;
+        const reqHtml = Object.entries(recipe.ingredients).map(([k, needed]) => {
+          const have = save.inventory[k] || 0;
+          if (have < needed) canCook = false;
+          return `<span class="${have < needed ? 'text-rose-400 font-extrabold' : 'text-slate-300'}">${INGREDIENTS[k].icon}${needed}</span>`;
+        }).join(" ");
+
+        return `
+          <button data-recipe="${recipe.id}" class="recipe-cook-btn btn-tactile rounded-xl border bg-gradient-to-br ${recipe.accent} p-2 sm:p-2.5 text-left flex flex-col justify-between ${!canCook ? 'opacity-50' : 'hover:brightness-110'}">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-xl sm:text-2xl">${recipe.icon}</span>
+              <span class="font-mono-num text-xs font-extrabold text-emerald-300 bg-slate-950/70 px-1.5 py-0.5 rounded-md">$${recipe.price}</span>
+            </div>
+            <div class="mt-1">
+              <div class="text-xs font-extrabold text-white truncate">${recipe.name}</div>
+              <div class="text-[10px] flex items-center gap-1.5 mt-0.5">${reqHtml}</div>
+            </div>
+          </button>
+        `;
+      }).join("");
+
+      recipesContainer.querySelectorAll(".recipe-cook-btn").forEach(btn => {
+        btn.addEventListener("click", () => startCookingRecipe(btn.getAttribute("data-recipe")));
+      });
+
+      syncRecipeHighlights();
+    }
+
+    // 11. MARKET & MENU MODALS
+    let currentMarketTab = "ingredients";
+
+    function openMarketModal() {
+      gameState.isPaused = true;
+      document.getElementById("modal-shift-end").classList.add("hidden");
+      document.getElementById("modal-market").classList.remove("hidden");
+      renderMarketContent();
+    }
+
+    function closeMarketModal() {
+      document.getElementById("modal-market").classList.add("hidden");
+      if (gameState.isPlaying) gameState.isPaused = false;
+      syncStaticDomUI();
+    }
+
+    function renderMarketContent() {
+      const save = getActiveSave();
+      document.getElementById("market-money").textContent = save.money;
+
+      const tabIng = document.getElementById("tab-ingredients");
+      const tabUpg = document.getElementById("tab-upgrades");
+      tabIng.className = currentMarketTab === "ingredients"
+        ? "pb-2.5 px-2 text-xs font-extrabold border-b-2 border-amber-400 text-amber-400"
+        : "pb-2.5 px-2 text-xs font-extrabold border-b-2 border-transparent text-slate-400 hover:text-slate-200";
+      tabUpg.className = currentMarketTab === "upgrades"
+        ? "pb-2.5 px-2 text-xs font-extrabold border-b-2 border-amber-400 text-amber-400"
+        : "pb-2.5 px-2 text-xs font-extrabold border-b-2 border-transparent text-slate-400 hover:text-slate-200";
+
+      const body = document.getElementById("market-body");
+      if (currentMarketTab === "ingredients") {
+        body.innerHTML = Object.values(INGREDIENTS).map(ing => {
+          const stock = save.inventory[ing.id] || 0;
+          return `
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-2xl">${ing.icon}</div>
+                <div>
+                  <div class="text-sm font-extrabold text-white">${ing.name}</div>
+                  <div class="text-xs text-slate-400">In Pantry: <span class="font-mono-num font-bold ${stock <= 1 ? 'text-rose-400' : 'text-emerald-400'}">${stock}</span></div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button data-buy-ing="${ing.id}" data-qty="1" data-cost="${ing.unitCost}" class="buy-ing-btn btn-tactile px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200">+1 ($${ing.unitCost})</button>
+                <button data-buy-ing="${ing.id}" data-qty="${ing.packSize}" data-cost="${ing.packCost}" class="buy-ing-btn btn-tactile px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-xs font-extrabold text-amber-300">+${ing.packSize} ($${ing.packCost})</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        body.querySelectorAll(".buy-ing-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-buy-ing");
+            const qty = Number(btn.getAttribute("data-qty"));
+            const cost = Number(btn.getAttribute("data-cost"));
+            if (save.money < cost) {
+              sfx.playError();
+              showToast("Not enough cash!", "rose");
+              return;
+            }
+            save.money -= cost;
+            save.inventory[id] = (save.inventory[id] || 0) + qty;
+            sfx.playCashRegister();
+            persistStorage();
+            renderMarketContent();
+            syncStaticDomUI();
+          });
+        });
+      } else {
+        body.innerHTML = UPGRADES.map(upg => {
+          const lvl = save.upgrades[upg.id] || 0;
+          const isMax = lvl >= upg.maxLevel;
+          const cost = Math.round(upg.baseCost * Math.pow(upg.costMult, lvl));
+          return `
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-indigo-500/15 border border-indigo-400/30 flex items-center justify-center text-2xl shrink-0">${upg.icon}</div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-extrabold text-white">${upg.name}</span>
+                    <span class="text-[10px] font-mono-num font-bold px-1.5 py-0.5 rounded bg-slate-800 text-amber-300">Lv ${lvl}/${upg.maxLevel}</span>
+                  </div>
+                  <p class="text-xs text-slate-400 mt-0.5">${upg.desc}</p>
+                </div>
+              </div>
+              <button data-buy-upg="${upg.id}" data-cost="${cost}" ${isMax ? "disabled" : ""} class="buy-upg-btn btn-tactile shrink-0 px-3.5 py-2 rounded-xl font-extrabold text-xs ${isMax ? 'bg-slate-800 text-slate-500' : 'bg-indigo-500 hover:bg-indigo-400 text-white shadow-lg'}">
+                ${isMax ? "MAXED" : `Upgrade $${cost}`}
+              </button>
+            </div>
+          `;
+        }).join("");
+
+        body.querySelectorAll(".buy-upg-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-buy-upg");
+            const cost = Number(btn.getAttribute("data-cost"));
+            if (save.money < cost) {
+              sfx.playError();
+              showToast("Not enough cash!", "rose");
+              return;
+            }
+            save.money -= cost;
+            save.upgrades[id] = (save.upgrades[id] || 0) + 1;
+            sfx.playCashRegister();
+            showToast("Kitchen upgraded!", "emerald");
+            persistStorage();
+            renderMarketContent();
+            syncStaticDomUI();
+          });
+        });
+      }
+    }
+
+    let pendingNewGameSlot = 0;
+
+    function openMainMenu() {
+      gameState.isPaused = true;
+      document.getElementById("app-version-label").textContent = `v${APP_VERSION}`;
+      document.getElementById("highscore-cash").textContent = `$${storageRoot.highscores.bestCash}`;
+      document.getElementById("highscore-day").textContent = storageRoot.highscores.bestDay;
+      document.getElementById("highscore-served").textContent = storageRoot.highscores.totalDishesEver;
+
+      const list = document.getElementById("save-slots-list");
+      list.innerHTML = storageRoot.slots.map((slot, idx) => {
+        if (!slot) {
+          return `
+            <div class="bg-slate-900/60 border border-dashed border-slate-700 rounded-2xl p-3 flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-slate-400">Save Slot #${idx + 1} — Empty</div>
+                <div class="text-[11px] text-slate-500">Open a new restaurant</div>
+              </div>
+              <button data-new-slot="${idx}" class="slot-new-btn btn-tactile bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs rounded-xl px-3.5 py-2">+ New Game</button>
+            </div>
+          `;
+        }
+        const isCurrent = idx === storageRoot.activeSlotIndex;
+        return `
+          <div class="bg-slate-900/90 border ${isCurrent ? 'border-amber-400/60' : 'border-slate-800'} rounded-2xl p-3 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-extrabold text-white truncate">${slot.bistroName}</span>
+                ${isCurrent ? `<span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300">Active</span>` : ''}
+              </div>
+              <div class="text-xs text-slate-400 mt-0.5 font-mono-num">
+                Day ${slot.day} • <span class="text-emerald-400 font-bold">$${slot.money}</span> • ★ ${slot.reputation.toFixed(1)}
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button data-new-slot="${idx}" class="slot-new-btn btn-tactile px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/70 text-slate-400 hover:text-rose-300 text-xs font-bold border border-slate-700">Reset</button>
+              <button data-play-slot="${idx}" class="slot-play-btn btn-tactile bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs rounded-xl px-4 py-2 shadow-md">Play</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      list.querySelectorAll(".slot-play-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          storageRoot.activeSlotIndex = Number(btn.getAttribute("data-play-slot"));
+          persistStorage();
+          startShift();
+        });
+      });
+
+      list.querySelectorAll(".slot-new-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          pendingNewGameSlot = Number(btn.getAttribute("data-new-slot"));
+          document.getElementById("new-game-slot-num").textContent = pendingNewGameSlot + 1;
+          document.getElementById("input-bistro-name").value = `Bistro #${pendingNewGameSlot + 1}`;
+          document.getElementById("modal-new-game").classList.remove("hidden");
+        });
+      });
+
+      document.getElementById("modal-main-menu").classList.remove("hidden");
+    }
+
+    // 12. MAIN 60 FPS SIMULATION & RENDER LOOP
+    let lastTime = performance.now();
+    let timerTextCache = "";
+
+    function mainLoop(now) {
+      const dt = Math.min(0.1, (now - lastTime) / 1000);
+      lastTime = now;
+
+      if (gameState.isPlaying && !gameState.isPaused) {
+        gameState.shiftTimeLeft -= dt;
+
+        // Spawn customers
+        gameState.spawnCooldown -= dt;
+        if (gameState.spawnCooldown <= 0) {
+          spawnCustomer();
+          const save = getActiveSave();
+          gameState.spawnCooldown = Math.max(3.5, 7.0 - save.day * 0.35);
+        }
+
+        // Smoothly move Chef
+        const chef = gameState.chef;
+        chef.x += (chef.targetX - chef.x) * Math.min(1, dt * 7);
+        chef.y += (chef.targetY - chef.y) * Math.min(1, dt * 7);
+
+        // Update Customers
+        let queueChanged = false;
+        for (let i = gameState.customers.length - 1; i >= 0; i--) {
+          const c = gameState.customers[i];
+          const dx = c.targetX - c.x;
+          const dy = c.targetY - c.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist > 2) {
+            const speed = 135;
+            c.x += (dx / dist) * Math.min(dist, speed * dt);
+            c.y += (dy / dist) * Math.min(dist, speed * dt);
+          } else if (c.state === "entering") {
+            c.state = "queuing";
+          } else if (c.state === "walkingToTable") {
+            c.state = "eating";
+          } else if (c.state === "leaving") {
+            gameState.customers.splice(i, 1);
+            continue;
+          }
+
+          if (c.state === "entering" || c.state === "queuing") {
+            c.patience -= dt;
+            if (c.patience <= 0) {
+              c.state = "leaving";
+              c.targetX = viewMetrics.doorPos.x;
+              c.targetY = viewMetrics.doorPos.y;
+              gameState.combo = 1.0;
+              gameState.shiftStats.missed += 1;
+              const save = getActiveSave();
+              save.reputation = Math.max(1.0, +(save.reputation - 0.15).toFixed(2));
+              sfx.playError();
+              showToast(`${c.style.name} left hungry!`, "rose");
+              queueChanged = true;
+              syncStaticDomUI();
+            }
+          } else if (c.state === "eating") {
+            c.eatTimer -= dt;
+            if (c.eatTimer <= 0) {
+              // Drop gold coin tip on table & leave happily
+              const tbl = viewMetrics.tables[c.tableIdx];
+              if (tbl) {
+                const tipAmt = Math.max(3, Math.round(4 * c.style.tipMult));
+                gameState.tableTips.push({
+                  tableIdx: tbl.index,
+                  amount: tipAmt,
+                  x: tbl.x + 12,
+                  y: tbl.y - 10
+                });
+              }
+              c.tableIdx = -1;
+              c.state = "leaving";
+              c.targetX = viewMetrics.doorPos.x;
+              c.targetY = viewMetrics.doorPos.y;
+            }
+          }
+        }
+
+        if (queueChanged) {
+          reassignQueuePositions();
+          syncRecipeHighlights();
+        }
+
+        // Update Cooking Stations
+        gameState.stations.forEach(st => {
+          if (st.status === "cooking") {
+            st.progress += dt;
+            if (st.progress >= st.duration) {
+              st.status = "ready";
+              st.burnProgress = 0;
+              sfx.playReadyBell();
+            }
+          } else if (st.status === "ready") {
+            st.burnProgress += dt;
+            if (st.burnProgress >= 12) {
+              st.status = "burned";
+              gameState.combo = 1.0;
+              sfx.playError();
+              showToast("Dish overcooked! Tap burner to clean.", "rose");
+            }
+          }
+        });
+
+        // Update Timer Bar (Only touches text when second ticks)
+        const mins = Math.floor(Math.max(0, gameState.shiftTimeLeft) / 60);
+        const secs = Math.floor(Math.max(0, gameState.shiftTimeLeft) % 60);
+        const timeStr = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+        if (timeStr !== timerTextCache) {
+          timerTextCache = timeStr;
+          document.getElementById("hud-time-left").textContent = timeStr;
+          const pct = Math.max(0, Math.min(100, (gameState.shiftTimeLeft / SHIFT_DURATION) * 100));
+          document.getElementById("hud-day-progress").style.width = `${pct}%`;
+        }
+
+        updateContextualHint();
+
+        // Check End of Shift
+        if (gameState.shiftTimeLeft <= 0) {
+          gameState.isPlaying = false;
+          const save = getActiveSave();
+          const completedDay = save.day;
+          save.day += 1;
+          persistStorage();
+
+          document.getElementById("summary-day").textContent = completedDay;
+          document.getElementById("summary-served").textContent = gameState.shiftStats.served;
+          document.getElementById("summary-earned").textContent = `+$${gameState.shiftStats.earned}`;
+          document.getElementById("summary-missed").textContent = gameState.shiftStats.missed;
+          document.getElementById("summary-balance").textContent = `$${save.money}`;
+          document.getElementById("summary-next-day").textContent = save.day;
+          document.getElementById("modal-shift-end").classList.remove("hidden");
+          sfx.playCashRegister();
+        }
+      }
+
+      // Update Particles & Floating Texts
+      for (let i = gameState.particles.length - 1; i >= 0; i--) {
+        const p = gameState.particles[i];
+        p.life -= dt;
+        if (p.life <= 0) { gameState.particles.splice(i, 1); continue; }
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vy += 220 * dt;
+      }
+      for (let i = gameState.floatingTexts.length - 1; i >= 0; i--) {
+        const ft = gameState.floatingTexts[i];
+        ft.life -= dt;
+        if (ft.life <= 0) { gameState.floatingTexts.splice(i, 1); continue; }
+        ft.y += ft.vy * dt;
+      }
+
+      drawRestaurantScene(now / 1000);
+      requestAnimationFrame(mainLoop);
+    }
+
+    // 13. UI BUTTON WIRING & STARTUP
+    document.getElementById("btn-mute").addEventListener("click", () => {
+      sfx.muted = !sfx.muted;
+      document.getElementById("icon-sound-state").textContent = sfx.muted ? "🔇" : "🔊";
+      persistStorage();
+    });
+
+    document.getElementById("btn-market-open").addEventListener("click", openMarketModal);
+    document.getElementById("btn-market-close").addEventListener("click", closeMarketModal);
+    document.getElementById("btn-market-resume").addEventListener("click", closeMarketModal);
+
+    document.getElementById("tab-ingredients").addEventListener("click", () => {
+      currentMarketTab = "ingredients";
+      renderMarketContent();
+    });
+    document.getElementById("tab-upgrades").addEventListener("click", () => {
+      currentMarketTab = "upgrades";
+      renderMarketContent();
+    });
+
+    document.getElementById("btn-restock-all").addEventListener("click", () => {
+      const save = getActiveSave();
+      let totalCost = 0;
+      Object.values(INGREDIENTS).forEach(ing => { totalCost += ing.unitCost * 3; });
+      if (save.money < totalCost) {
+        sfx.playError();
+        showToast(`Need $${totalCost} to bulk restock!`, "rose");
+        return;
+      }
+      save.money -= totalCost;
+      Object.values(INGREDIENTS).forEach(ing => {
+        save.inventory[ing.id] = (save.inventory[ing.id] || 0) + 3;
+      });
+      sfx.playCashRegister();
+      showToast("Restocked +3 of every ingredient!", "emerald");
+      persistStorage();
+      renderMarketContent();
+      syncStaticDomUI();
+    });
+
+    document.getElementById("btn-upgrade-stove").addEventListener("click", buyBurnerSlot);
+    document.getElementById("btn-menu-open").addEventListener("click", openMainMenu);
+    document.getElementById("btn-menu-close").addEventListener("click", () => {
+      document.getElementById("modal-main-menu").classList.add("hidden");
+      if (gameState.isPlaying) gameState.isPaused = false;
+    });
+
+    document.getElementById("btn-summary-market").addEventListener("click", openMarketModal);
+    document.getElementById("btn-next-day").addEventListener("click", () => startShift());
+
+    document.getElementById("btn-cancel-new-game").addEventListener("click", () => {
+      document.getElementById("modal-new-game").classList.add("hidden");
+    });
+
+    document.getElementById("btn-confirm-new-game").addEventListener("click", () => {
+      const rawName = document.getElementById("input-bistro-name").value.trim();
+      const finalName = rawName || `Bistro #${pendingNewGameSlot + 1}`;
+      storageRoot.slots[pendingNewGameSlot] = createDefaultSlotData(finalName);
+      storageRoot.activeSlotIndex = pendingNewGameSlot;
+      persistStorage();
+      document.getElementById("modal-new-game").classList.add("hidden");
+      startShift();
+    });
+
+    document.getElementById("btn-check-update").addEventListener("click", () => checkForAppUpdate(true));
+    document.addEventListener("dblclick", e => e.preventDefault(), { passive: false });
+
+    window.addEventListener("load", () => {
+      document.getElementById("icon-sound-state").textContent = sfx.muted ? "🔇" : "🔊";
+      computeWorldLayout();
+      initStationsFromSave();
+      syncStaticDomUI();
+      openMainMenu();
+      checkForAppUpdate(false);
+      requestAnimationFrame(mainLoop);
+    });
+  </script>
+</body>
+</html>
