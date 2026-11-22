@@ -401,14 +401,14 @@
   <script>
     /**
      * =========================================================================
-     * BISTRO RUSH v1.1.1 — FLICKER-FREE TOP-DOWN 2D RESTAURANT & KITCHEN TYCOON
+     * BISTRO RUSH v1.1.2 — FLICKER-FREE TOP-DOWN 2D RESTAURANT & KITCHEN TYCOON
      * =========================================================================
      */
 
-    const APP_VERSION = "1.1.1";
+    const APP_VERSION = "1.1.2";
     const STORAGE_KEY_ROOT = "bistro_rush_save_v2";
 
-    // 1. HIGH-CONTRAST CHEF PWA HOME SCREEN ICON GENERATOR (NO TEXT, DARK INDIGO BACKDROP)
+    // 1. HIGH-CONTRAST CUSTOM VECTOR CHEF PWA ICON (NO EMOJI FONT BUGS ON iOS CANVAS)
     (function generatePWAHomeIcon() {
       try {
         const canvas = document.createElement("canvas");
@@ -416,34 +416,148 @@
         canvas.height = 512;
         const ctx = canvas.getContext("2d");
 
-        // Deep Midnight Indigo & Slate Gradient (makes yellow chef face & white toque pop)
+        // Deep Midnight Indigo & Slate Gradient
         const bgGrad = ctx.createLinearGradient(0, 0, 512, 512);
         bgGrad.addColorStop(0, "#1e293b");
-        bgGrad.addColorStop(0.5, "#1e1b4b");
+        bgGrad.addColorStop(0.55, "#1e1b4b");
         bgGrad.addColorStop(1, "#090d16");
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, 512, 512);
 
-        // Soft Cool-Blue & Subtle Amber Rim Spotlight behind Chef
-        const glowGrad = ctx.createRadialGradient(256, 260, 24, 256, 260, 225);
-        glowGrad.addColorStop(0, "rgba(99, 102, 241, 0.36)");
-        glowGrad.addColorStop(0.6, "rgba(56, 189, 248, 0.12)");
+        // Soft Spotlight Glow behind Chef
+        const glowGrad = ctx.createRadialGradient(256, 265, 20, 256, 265, 220);
+        glowGrad.addColorStop(0, "rgba(99, 102, 241, 0.42)");
+        glowGrad.addColorStop(0.65, "rgba(56, 189, 248, 0.14)");
         glowGrad.addColorStop(1, "rgba(15, 23, 42, 0)");
         ctx.fillStyle = glowGrad;
         ctx.beginPath();
-        ctx.arc(256, 260, 225, 0, Math.PI * 2);
+        ctx.arc(256, 265, 220, 0, Math.PI * 2);
         ctx.fill();
 
-        // Crisp Chef Emoji Centerpiece with Drop Shadow
         ctx.save();
-        ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
-        ctx.shadowBlur = 26;
-        ctx.shadowOffsetY = 12;
-        ctx.font = "330px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("👨‍🍳", 256, 274);
+        ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
+        ctx.shadowBlur = 22;
+        ctx.shadowOffsetY = 10;
+
+        // Chef Coat / Shoulders
+        ctx.fillStyle = "#f8fafc";
+        ctx.beginPath();
+        ctx.roundRect(148, 344, 216, 112, [68, 68, 24, 24]);
+        ctx.fill();
         ctx.restore();
+
+        // Coat Collar & Buttons
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(216, 350);
+        ctx.lineTo(256, 408);
+        ctx.lineTo(296, 350);
+        ctx.stroke();
+
+        ctx.fillStyle = "#94a3b8";
+        ctx.beginPath();
+        ctx.arc(256, 424, 6, 0, Math.PI * 2);
+        ctx.arc(256, 444, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Wooden Spoon Held on Right
+        ctx.save();
+        ctx.translate(344, 346);
+        ctx.rotate(0.32);
+        ctx.fillStyle = "#d97706";
+        ctx.beginPath();
+        ctx.roundRect(-8, 0, 16, 108, 8);
+        ctx.fill();
+        ctx.fillStyle = "#f59e0b";
+        ctx.beginPath();
+        ctx.ellipse(0, -14, 22, 30, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Ears
+        ctx.fillStyle = "#f59e0b";
+        ctx.beginPath();
+        ctx.arc(174, 266, 18, 0, Math.PI * 2);
+        ctx.arc(338, 266, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bright Warm Yellow Chef Face
+        const faceGrad = ctx.createRadialGradient(244, 244, 15, 256, 262, 92);
+        faceGrad.addColorStop(0, "#fef08a");
+        faceGrad.addColorStop(0.65, "#facc15");
+        faceGrad.addColorStop(1, "#eab308");
+        ctx.fillStyle = faceGrad;
+        ctx.beginPath();
+        ctx.arc(256, 264, 82, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Rosy Cheeks
+        ctx.fillStyle = "rgba(249, 115, 22, 0.28)";
+        ctx.beginPath();
+        ctx.ellipse(212, 278, 14, 9, 0, 0, Math.PI * 2);
+        ctx.ellipse(300, 278, 14, 9, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eyes & Happy Eyebrows
+        ctx.fillStyle = "#1e293b";
+        ctx.beginPath();
+        ctx.arc(228, 254, 9, 0, Math.PI * 2);
+        ctx.arc(284, 254, 9, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(225, 251, 3.2, 0, Math.PI * 2);
+        ctx.arc(281, 251, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = "#78350f";
+        ctx.lineWidth = 5;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.arc(228, 242, 16, Math.PI * 1.15, Math.PI * 1.85);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(284, 242, 16, Math.PI * 1.15, Math.PI * 1.85);
+        ctx.stroke();
+
+        // Warm Smile
+        ctx.strokeStyle = "#78350f";
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(256, 282, 22, 0.15 * Math.PI, 0.85 * Math.PI);
+        ctx.stroke();
+
+        // Crisp White Puffy Chef Toque (Hat)
+        ctx.save();
+        ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
+        ctx.shadowBlur = 14;
+        ctx.shadowOffsetY = 6;
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(192, 134, 46, 0, Math.PI * 2);
+        ctx.arc(256, 114, 56, 0, Math.PI * 2);
+        ctx.arc(320, 134, 46, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.roundRect(178, 134, 156, 72, 18);
+        ctx.fill();
+        ctx.restore();
+
+        // Hat Band & Pleats
+        ctx.fillStyle = "#e2e8f0";
+        ctx.fillRect(180, 186, 152, 18);
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(222, 142);
+        ctx.lineTo(222, 180);
+        ctx.moveTo(256, 136);
+        ctx.lineTo(256, 180);
+        ctx.moveTo(290, 142);
+        ctx.lineTo(290, 180);
+        ctx.stroke();
 
         const dataUrl = canvas.toDataURL("image/png");
 
